@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="#FFFFFF" /> <!-- Rengi beyaz yap -->
+    <corners android:radius="12dp" /> <!-- Köşe yuvarlama radius'u -->
+    <stroke
+        android:width="2dp"
+        android:color="#673AB7" /> <!-- Kenarlık kalınlığı ve rengi -->
+</shape>
