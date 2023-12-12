@@ -88,9 +88,8 @@ public class WelcomeFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)
+        fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.welcomeFragmentLayout, fragment)
                 .commit();
     }
 

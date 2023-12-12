@@ -21,7 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/emailEt"
             style="@style/LoginTextInputInnerFieldStyle"
             android:layout_width="match_parent"
@@ -45,7 +45,7 @@
         app:layout_constraintTop_toBottomOf="@id/emailLayout"
         app:passwordToggleEnabled="true">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/passET"
             style="@style/LoginTextInputInnerFieldStyle"
             android:layout_width="match_parent"
@@ -69,7 +69,7 @@
         app:layout_constraintTop_toBottomOf="@id/passwordLayout"
         app:passwordToggleEnabled="true">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/confirmPassEt"
             style="@style/LoginTextInputInnerFieldStyle"
             android:layout_width="match_parent"
@@ -79,7 +79,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button"
+        android:id="@+id/registrationButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
@@ -102,5 +102,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        app:layout_constraintTop_toBottomOf="@+id/registrationButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>
