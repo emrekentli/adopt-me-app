@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         // to make the Navigation drawer icon always appear on the action bar
-
+        replaceFragments(AdsFragment.class);
     }
 
     private void redirectToLogin() {

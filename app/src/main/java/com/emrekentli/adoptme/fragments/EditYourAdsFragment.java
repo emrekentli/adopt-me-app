@@ -32,7 +32,9 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
+import com.emrekentli.adoptme.model.response.ApiResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -71,8 +73,9 @@ public class EditYourAdsFragment extends Fragment {
     Integer selectedPlace = null;
     Boolean finishUpload= false;
     Boolean clickedPhoto=false;
+    TokenManager tokenManager;
     private List<PostModel> addNewList;
-    Integer adId;
+    String adId;
     private String[] spinnerCityList={"Şehir Seçiniz.","Tüm Türkiye","Adana", "Adıyaman", "Afyon", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
             "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale",
             "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir",
@@ -111,7 +114,7 @@ public class EditYourAdsFragment extends Fragment {
 
         // bu fragment'in layout'unu hazır hale getirelim
          view = inflater.inflate(R.layout.newadd_fragment, container, false);
-
+        tokenManager = new TokenManager(getContext());
 
         getExtras();
         setView();
@@ -128,20 +131,16 @@ public class EditYourAdsFragment extends Fragment {
 
     }
 
-    public void getDetails(Integer id) {
+    public void getDetails(String id) {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<PostModel> call = restInterface[0].getDescriptions(id);
-        call.enqueue(new Callback<PostModel>() {
+        Call<ApiResponse<PostModel>> call = restInterface[0].getById(tokenManager.getToken(),id);
+        call.enqueue(new Callback<ApiResponse<PostModel>>() {
             @Override
-            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
+            public void onResponse(Call<ApiResponse<PostModel>> call, Response<ApiResponse<PostModel>> response) {
 
-                repo= response.body();
-
-
-
-
+                repo= response.body().getData();
                 pushButton.setText("YAYINA GÖNDER");
 
 
@@ -195,7 +194,7 @@ public class EditYourAdsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<PostModel> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<PostModel>> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });
@@ -205,7 +204,7 @@ public class EditYourAdsFragment extends Fragment {
     public void getExtras() {
         Bundle bundle = getArguments();
         if(bundle!=null){
-            adId = bundle.getInt("adid");
+            adId = bundle.getString("adid");
             getDetails(adId);
 
         }

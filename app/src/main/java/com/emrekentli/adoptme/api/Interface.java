@@ -1,7 +1,6 @@
 package com.emrekentli.adoptme.api;
 
 import com.emrekentli.adoptme.model.PostModel;
-import com.emrekentli.adoptme.model.SearchModel;
 import com.emrekentli.adoptme.model.UserModel;
 import com.emrekentli.adoptme.model.VersionCheck;
 import com.emrekentli.adoptme.model.request.LoginRequest;
@@ -25,49 +24,27 @@ import retrofit2.http.Path;
 
 public interface Interface {
 
-    @GET("posts")
-    Call<List<PostModel>> getAds(@Header("Authorization") String authToken);
-
-
-
-    @GET("posts/birds")
-    Call<List<PostModel>> getBirdAds(@Header("Authorization") String authToken);
-
-    @GET("posts/cats")
-    Call<List<PostModel>> getCatAds(@Header("Authorization") String authToken);
-
-    @GET("posts/others")
-    Call<List<PostModel>> getOtherAds(@Header("Authorization") String authToken);
 
     @GET("ads")
-    Call<List<SearchModel>> getAdsSearch();
+    Call<List<PostModel>> getAdsSearch();
 
     @GET("ads/others")
-    Call<List<SearchModel>> getOtherAdsSearch();
+    Call<List<PostModel>> getOtherAdsSearch();
 
     @GET("search/{tags}")
-    Call<List<SearchModel>> getSearch(@Path("tags") String tags);
+    Call<List<PostModel>> getSearch(@Path("tags") String tags);
 
 
     @GET("search/{city}/{tags}")
-    Call<List<SearchModel>> getAdsSearchWithCity(@Path("tags") String tags,  @Path("city") String city);
+    Call<List<PostModel>> getAdsSearchWithCity(@Path("tags") String tags,  @Path("city") String city);
 
-
-    @GET("ads/id/{id}")
-    Call<PostModel> getDescriptions(@Path("id") Integer id);
-
-    @GET("ads/user/{id}")
-    Call<List<PostModel>> getOwnAds(@Path("id") String id);
-
-    @GET("ads/user/{id}")
-    Call<List<SearchModel>> getOwnAdsId(@Path("id") String id);
 
     @DELETE("ads/id/{id}")
-    Call<SearchModel> deleteAds(@Path("id") String id);
+    Call<PostModel> deleteAds(@Path("id") String id);
 
 
     @PUT("ads/id/confirmation/{id}")
-    Call<SearchModel> unConfirmation(@Path("id") String id);
+    Call<PostModel> unConfirmation(@Path("id") String id);
 
     @GET("version")
     Call<List<VersionCheck>> checkVersion();
@@ -151,5 +128,19 @@ public interface Interface {
 
     @GET("posts/dogs")
     Call<ApiResponse<DataResponse<PostModel>>> getDogAds(@Header("Authorization") String authToken);
+    @GET("posts/cats")
+    Call<ApiResponse<DataResponse<PostModel>>> getCatAds(@Header("Authorization") String authToken);
+    @GET("posts/others")
+    Call<ApiResponse<DataResponse<PostModel>>> getOtherAds(@Header("Authorization") String authToken);
+
+    @GET("posts")
+    Call<ApiResponse<DataResponse<PostModel>>> getAds(@Header("Authorization") String authToken);
+
+    @GET("posts/{id}")
+    Call<ApiResponse<PostModel>> getById(@Header("Authorization") String authToken,@Path("id") String id);
+
+    @GET("posts/my-user")
+    Call<ApiResponse<DataResponse<PostModel>>> getOwnAds(@Header("Authorization") String authToken);
+
 }
 

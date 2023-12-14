@@ -13,19 +13,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.emrekentli.adoptme.R;
-import com.emrekentli.adoptme.model.SearchModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
-public class SearchAdaptor extends ArrayAdapter<SearchModel> {
-    List<SearchModel> listData;
+public class SearchAdaptor extends ArrayAdapter<PostModel> {
+    List<PostModel> listData;
     Context context;
     int resource;
 
 
 
-    public SearchAdaptor(@NonNull Context context, int resource, @NonNull List<SearchModel> listData) {
+    public SearchAdaptor(@NonNull Context context, int resource, @NonNull List<PostModel> listData) {
         super(context, resource, listData);
 
 
@@ -42,17 +44,17 @@ public class SearchAdaptor extends ArrayAdapter<SearchModel> {
             LayoutInflater layoutInflater=(LayoutInflater)getContext().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             convertView=layoutInflater.inflate(R.layout.search_row,null,true);
         }
-        SearchModel listdata=getItem(position);
+        PostModel listdata=getItem(position);
         ImageView img=(ImageView)convertView.findViewById(R.id.ad_image);
         TextView txtCountry=convertView.findViewById(R.id.ad_status);
         TextView txtName=convertView.findViewById(R.id.ad_Name);
         TextView txtDetail=convertView.findViewById(R.id.ad_Detail);
         TextView txtAltDetail=convertView.findViewById(R.id.ad_Detail2);
 
-        txtAltDetail.setText(listdata.getAdAltcategory());
+        txtAltDetail.setText(listdata.getBreed().getName());
         txtName.setText(listdata.getName());
-        txtCountry.setText("listdata.getCity().getName()");
-        txtDetail.setText(String.valueOf(listdata.getCreated()));
+        txtCountry.setText(listdata.getCity().getName());
+        txtDetail.setText(formatDate(listdata.getCreated()));
 
         Picasso
                 .get()
@@ -62,6 +64,11 @@ public class SearchAdaptor extends ArrayAdapter<SearchModel> {
 
 
         return convertView;
+    }
+
+    private String formatDate(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        return dateFormat.format(date);
     }
 
 }

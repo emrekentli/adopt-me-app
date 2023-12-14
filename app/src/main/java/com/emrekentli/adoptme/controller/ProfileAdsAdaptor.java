@@ -26,7 +26,6 @@ import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.fragments.EditYourAdsFragment;
 import com.emrekentli.adoptme.model.PostModel;
-import com.emrekentli.adoptme.model.SearchModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -182,10 +181,10 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
     public void deleteAds (String id) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<SearchModel> call = restInterface[0].deleteAds(id);
-        call.enqueue(new Callback<SearchModel>() {
+        Call<PostModel> call = restInterface[0].deleteAds(id);
+        call.enqueue(new Callback<PostModel>() {
             @Override
-            public void onResponse(Call<SearchModel> call, Response<SearchModel> response) {
+            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
                 if (response.isSuccessful()) {
 
                     Toast.makeText(getContext(), "İlan başarıyla silindi.", Toast.LENGTH_SHORT).show();
@@ -199,7 +198,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
             }
 
             @Override
-            public void onFailure(Call<SearchModel> call, Throwable t) {
+            public void onFailure(Call<PostModel> call, Throwable t) {
                 Log.e("Hata",t.toString());
                 Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
             }
@@ -211,10 +210,10 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<SearchModel> call = restInterface[0].unConfirmation(id);
-        call.enqueue(new Callback<SearchModel>() {
+        Call<PostModel> call = restInterface[0].unConfirmation(id);
+        call.enqueue(new Callback<PostModel>() {
             @Override
-            public void onResponse(Call<SearchModel> call, Response<SearchModel> response) {
+            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
                 if (response.isSuccessful()) {
 
                     Toast.makeText(getContext(), "İlan başarıyla yayından kaldırıldı..", Toast.LENGTH_SHORT).show();
@@ -228,7 +227,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
             }
 
             @Override
-            public void onFailure(Call<SearchModel> call, Throwable t) {
+            public void onFailure(Call<PostModel> call, Throwable t) {
                 Log.e("Hata",t.toString());
                 Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
             }

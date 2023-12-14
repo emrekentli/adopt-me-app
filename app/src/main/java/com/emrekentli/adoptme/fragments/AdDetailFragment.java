@@ -29,17 +29,16 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
-import com.emrekentli.adoptme.model.UserModel;
+import com.emrekentli.adoptme.model.dto.Gender;
+import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.UserDto;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
@@ -47,42 +46,34 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AdDetailFragment extends Fragment {
-
-    private List<UserModel> specList;
-    PhotoView adimagex,adimagex2;
-    TextView adName,adDetail,adCountry,dateValue;
-    Integer adId;
-    TextView ageValue,sexValue,CategoryValue,cinsValue,memberName;
-    GoogleSignInAccount account;
+    PhotoView mainImage;
+    TextView adName, adDetail, adCountry, dateValue;
+    String adId;
+    TextView ageValue, sexValue, CategoryValue, cinsValue, memberName;
     LinearLayout wpButton;
-    Button allAdsButton,buttonTelephone;
+    Button allAdsButton, buttonTelephone;
+    TokenManager tokenManager;
     LinearLayout callButton;
     View view;
     String ownerId;
-    String photo1url,photo2url;
-    GoogleSignInClient mGoogleSignInClient;
-    String  userId;
+    String photo1url, photo2url;
+    String userId;
     PostModel repo;
     CircleImageView profileImage;
     Dialog dialog;
-    private List<UserModel> userRepo;
-    String providerId,name,email,uid;
-    Uri photoUrl;
-    FirebaseUser user;
-    String  telephone;
+    String name, email, id;
+    String photoUrl;
+    String telephone;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // bu fragment'in layout'unu hazır hale getirelim
-         view = inflater.inflate(R.layout.ads_detail, container, false);
+        view = inflater.inflate(R.layout.ads_detail, container, false);
         setView();
         getExtras();
-        getAccountDetails();
         setClick();
-
-
         return view;
     }
 
@@ -93,41 +84,21 @@ public class AdDetailFragment extends Fragment {
 
     }
 
-    public  void getAccountDetails () {
-
-        user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user != null) {
-            for (UserInfo profile : user.getProviderData()) {
-                // Id of the provider (ex: google.com)
-                providerId = profile.getProviderId();
-
-                // UID specific to the provider
-                uid = profile.getUid();
-
-                // Name, email address, and profile photo Url
-                name = profile.getDisplayName();
-                email = profile.getEmail();
-                photoUrl = profile.getPhotoUrl();
+    public void getAccountDetails(UserDto user) {
+        id = user.getId();
+        name = user.getFullName();
+        email = user.getEmail();
+        photoUrl = user.getImage();
 
 
-                userId = profile.getUid();
+        userId = id;
 
-                Log.i("Bilgi",uid.toString());
-            }
-        }
-
-
+        Log.i("Bilgi", id.toString());
     }
 
 
-
-
-
-
-    public void setView()
-    {
-        adimagex = view.findViewById(R.id.adimagex);
+    public void setView() {
+        mainImage = view.findViewById(R.id.adimagex);
         adName = view.findViewById(R.id.ad_name);
         adDetail = view.findViewById(R.id.ad_detail);
         adCountry = view.findViewById(R.id.country);
@@ -138,62 +109,20 @@ public class AdDetailFragment extends Fragment {
         CategoryValue = view.findViewById(R.id.adcategoryvalue);
         cinsValue = view.findViewById(R.id.cinsValue);
         allAdsButton = view.findViewById(R.id.allAdsBt);
-        wpButton =view.findViewById(R.id.wpButton);
-        buttonTelephone= view.findViewById(R.id.buttonTelephone);
-        adimagex2 = view.findViewById(R.id.adimagex2);
+        wpButton = view.findViewById(R.id.wpButton);
+        buttonTelephone = view.findViewById(R.id.buttonTelephone);
         profileImage = view.findViewById(R.id.profileImage);
         callButton = view.findViewById(R.id.callButton);
+    }
 
-    }    public void getExtras() {
+    public void getExtras() {
         Bundle bundle = getArguments();
-        if(bundle!=null){
-            adId = bundle.getInt("adid");
-            lastAds(adId);
+        if (bundle != null) {
+            adId = bundle.getString("adid");
+            getById(adId);
 
         }
     }
-
-    public void getProfileSpecs(String id) {
-
-
-
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<UserModel>> call = restInterface[0].getUserSpecs(id);
-        call.enqueue(new Callback<List<UserModel>>() {
-            @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-
-
-                userRepo = response.body();
-
-
-                if (userRepo.get(0).getUserPhoto()==null) {
-
-
-                    Picasso.get().load(R.drawable.nopic).fit().into(profileImage);
-
-                } else {
-
-                    Picasso.get().load(userRepo.get(0).getUserPhoto()).fit().into(profileImage);
-
-                }
-
-                Log.i("Bilgi",response.toString());
-
-            }
-
-            @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
-
-
-                Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
-
-
-            }
-        });
-    }
-
 
 
     public void setClick() {
@@ -208,7 +137,7 @@ public class AdDetailFragment extends Fragment {
                 sendIntent.setPackage("com.whatsapp");
                 String url = "https://api.whatsapp.com/send?phone=9" + telephone;
                 sendIntent.setData(Uri.parse(url));
-                if(sendIntent.resolveActivity(getContext().getPackageManager()) != null){
+                if (sendIntent.resolveActivity(getContext().getPackageManager()) != null) {
                     startActivity(sendIntent);
                 }
 
@@ -216,19 +145,11 @@ public class AdDetailFragment extends Fragment {
         });
 
 
-        adimagex.setOnClickListener(new View.OnClickListener() {
+        mainImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 showDialog("1");
-            }
-        });
-
-        adimagex2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                showDialog("2");
             }
         });
 
@@ -237,7 +158,7 @@ public class AdDetailFragment extends Fragment {
             public void onClick(View v) {
 
 
-                replaceFragmentsSearch(ownerId,SearchFragment.class);
+                replaceFragmentsSearch(ownerId, SearchFragment.class);
 
             }
         });
@@ -254,11 +175,10 @@ public class AdDetailFragment extends Fragment {
         });
 
 
-
     }
 
 
-    public void replaceFragmentsSearch(String id,Class fragmentClass) {
+    public void replaceFragmentsSearch(String id, Class fragmentClass) {
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -267,15 +187,28 @@ public class AdDetailFragment extends Fragment {
         }
         // Insert the fragment by replacing any existing fragment
         Bundle args = new Bundle();
-        args.putString("searchValue","id");
-        args.putString("userId",id);
+        args.putString("searchValue", "id");
+        args.putString("userId", id);
         fragment.setArguments(args);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)
                 .commit();
     }
 
-    public void setViewStatic(Integer  id, Integer view) {
+    public void replaceFragments(Class fragmentClass) {
+        Fragment fragment = null;
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.fragmentLayout, fragment)
+                .commit();
+    }
+
+    public void setViewStatic(Integer id, Integer view) {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
@@ -285,84 +218,86 @@ public class AdDetailFragment extends Fragment {
             @Override
             public void onResponse(Call<PostModel> call, Response<PostModel> response) {
 
-                repo= response.body();
-
+                repo = response.body();
 
 
             }
 
             @Override
             public void onFailure(Call<PostModel> call, Throwable t) {
-                Log.e("Hata",t.toString());
+                Log.e("Hata", t.toString());
             }
         });
 
     }
 
-    public void lastAds(Integer id) {
-
+    public void getById(String id) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<PostModel> call = restInterface[0].getDescriptions(id);
-        call.enqueue(new Callback<PostModel>() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
+        tokenManager =  new TokenManager(getContext());
+        String token = tokenManager.getToken();
+        Call<ApiResponse<PostModel>> call = restInterface[0].getById("Bearer "+ token,id);
+
+        call.enqueue(new Callback<ApiResponse<PostModel>>() {
             @Override
-            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
+            public void onResponse(Call<ApiResponse<PostModel>> call, Response<ApiResponse<PostModel>> response) {
 
-                repo= response.body();
-
-                ownerId =  repo.getOwner().getId();
-
-                getProfileSpecs(ownerId);
-
+                if (response.body() != null) {
+                    repo = response.body().getData();
+                    ownerId = repo.getOwner().getId();
+                    Picasso.get().load(repo.getOwner().getImage()).fit().into(profileImage);
 
 
+                    adCountry.setText(repo.getCity().getName());
+                    adName.setText("\n" + repo.getName() + "\n");
+                    getAccountDetails(repo.getOwner());
+                    dateValue.setText(formatDate(repo.getCreated()));
 
-            adCountry.setText(repo.getCity().getName());
-            adName.setText("\n" +repo.getName() + "\n");
+                    telephone = repo.getOwner().getPhoneNumber();
 
+                    Picasso
+                            .get()
+                            .load(repo.getMainImage())
+                            .fit()
+                            .into(mainImage);
 
-            dateValue.setText(repo.getCreated().toString());
+                    photo1url = repo.getMainImage();
+                    adDetail.setText("\n" + repo.getDescription() + "\n");
+                    ageValue.setText(repo.getAge().toString());
+                    sexValue.setText(repo.getGender().equals(Gender.MALE) ? "Erkek" : "Dişi");
+                    CategoryValue.setText(repo.getAnimalType().getName());
+                    cinsValue.setText(repo.getBreed().getName());
+                    memberName.setText(repo.getOwner().getFullName());
+                    buttonTelephone.setText("Mesaj Gönder +" + repo.getOwner().getPhoneNumber());
 
-            telephone = repo.getOwner().getPhoneNumber();
-
-                Picasso
-                        .get()
-                        .load(repo.getMainImage())
-                        .fit()
-                        .into(adimagex);
-
-                photo1url =repo.getMainImage();
-                adDetail.setText("\n" + repo.getDescription() + "\n");
-                ageValue.setText(repo.getAge());
-                sexValue.setText(repo.getGender().toString());
-                CategoryValue.setText(repo.getAnimalType().getName());
-                cinsValue.setText(repo.getBreed().getName());
-                memberName.setText(repo.getOwner().getFullName());
-
-                buttonTelephone.setText("Mesaj Gönder +" + repo.getOwner().getPhoneNumber());
-
-
+                } else {
+                    Toast.makeText(getContext(), "İlan bulunamadı.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
-            public void onFailure(Call<PostModel> call, Throwable t) {
-                Log.e("Hata",t.toString());
+            public void onFailure(Call<ApiResponse<PostModel>> call, Throwable t) {
+                Log.e("Hata", t.toString());
             }
         });
 
     }
 
-    private void onCallBtnClick(){
+    private String formatDate(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        return dateFormat.format(date);
+    }
+
+    private void onCallBtnClick() {
         if (Build.VERSION.SDK_INT < 23) {
             phoneCall();
-        }else {
+        } else {
 
             if (ActivityCompat.checkSelfPermission(getActivity(),
                     Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
 
                 phoneCall();
-            }else {
+            } else {
                 final String[] PERMISSIONS_STORAGE = {Manifest.permission.CALL_PHONE};
                 //Asking request Permissions
                 ActivityCompat.requestPermissions(getActivity(), PERMISSIONS_STORAGE, 9);
@@ -373,31 +308,30 @@ public class AdDetailFragment extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         boolean permissionGranted = false;
-        switch(requestCode){
+        switch (requestCode) {
             case 9:
-                permissionGranted = grantResults[0]== PackageManager.PERMISSION_GRANTED;
+                permissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 phoneCall();
                 break;
         }
-        if(permissionGranted){
+        if (permissionGranted) {
             phoneCall();
 
-        }else {
+        } else {
             Toast.makeText(getActivity(), "You don't assign permission.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void phoneCall(){
+    private void phoneCall() {
         if (ActivityCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             Intent callIntent = new Intent(Intent.ACTION_CALL);
             callIntent.setData(Uri.parse("tel:" + telephone));
             getActivity().startActivity(callIntent);
-        }else{
+        } else {
             Toast.makeText(getActivity(), "You don't assign permission.", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 
     private void showDialog(String url) {
@@ -410,14 +344,13 @@ public class AdDetailFragment extends Fragment {
         Button buy = (Button) dialog.findViewById(R.id.btnBuy);
         ImageView photo = (ImageView) dialog.findViewById(R.id.photo);
 
-       if (url.equals("1")) {
-       Picasso.get().load(photo1url).fit().into(photo); }
+        if (url.equals("1")) {
+            Picasso.get().load(photo1url).fit().into(photo);
+        } else {
+            Picasso.get().load(photo2url).fit().into(photo);
 
-       else {
-           Picasso.get().load(photo2url).fit().into(photo);
 
-
-       }
+        }
 
 
         // Close Button

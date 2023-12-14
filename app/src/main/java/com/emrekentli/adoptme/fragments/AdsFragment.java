@@ -37,7 +37,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AdsFragment extends Fragment {
-    private GridView lastAds,dogAds,birdAds,otherAds;
+    private GridView lastAds,dogAds, catAds,otherAds;
     private AdsAdaptor adapter;
     private List<PostModel> lastList,dogsList,catsList,lastothers;
     LinearLayout loading;
@@ -75,6 +75,9 @@ public class AdsFragment extends Fragment {
         super.onStart();
         setCity();
         lastDogAds();
+        lastCatAds();
+        lastOtherAds();
+        lastAds();
      //   loading.setVisibility(View.GONE);
 
 
@@ -88,7 +91,7 @@ public class AdsFragment extends Fragment {
         spinnerIller = view.findViewById(R.id.spinner1);
         lastAds=(GridView)view.findViewById(R.id.adsView);
         dogAds=(GridView)view.findViewById(R.id.adsView2);
-        birdAds=(GridView)view.findViewById(R.id.adsView3);
+        catAds =(GridView)view.findViewById(R.id.adsView3);
         otherAds=(GridView)view.findViewById(R.id.adsView4);
         searchBt = view.findViewById(R.id.buttonSearch);
         searchTv = view.findViewById(R.id.searchTv);
@@ -128,10 +131,7 @@ public class AdsFragment extends Fragment {
         showDogAdsBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 replaceFragmentsSearch("köpek",SearchFragment.class);
-
             }
         });
         showCatAdsBt.setOnClickListener(new View.OnClickListener() {
@@ -202,7 +202,7 @@ public class AdsFragment extends Fragment {
             }
         });
 
-        birdAds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        catAds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
@@ -234,46 +234,51 @@ public class AdsFragment extends Fragment {
     }
 
     public void lastAds() {
-
-    final Interface[] restInterface = new Interface[1];
-    restInterface[0] = ApiClient.getClient().create(Interface.class);
-    Call<List<PostModel>> call = restInterface[0].getAds("Bearer " +tokenManager.getToken());
-    call.enqueue(new Callback<List<PostModel>>() {
-        @Override
-        public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
-            lastList=response.body();
-
-
-            if (getActivity()!=null){
-                adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,lastList);
-                Log.i("Bilgi",response.toString());
-                lastAds.setAdapter(adapter);
-            }
-
-
-        }
-
-        @Override
-        public void onFailure(Call<List<PostModel>> call, Throwable t) {
-            Log.e("Hata",t.toString());
-        }
-    });
-
-}
-
-    public void lastDogAds() {
-
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
         Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getDogAds("Bearer " +tokenManager.getToken());
         call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
             public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
-                dogsList=response.body().getData().getItems();
-                if (getActivity()!=null){
-                adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,dogsList);
-                Log.i("Bilgi",response.toString());
-                dogAds.setAdapter(adapter); }
+                if(response.body()!=null) {
+                    lastList = response.body().getData().getItems();
+                    if (getActivity() != null) {
+                        adapter = new AdsAdaptor(getContext(), R.layout.lastads_row, lastList);
+                        Log.i("Bilgi", response.toString());
+                        lastAds.setAdapter(adapter);
+                    }
+                }
+                else {
+                    replaceFragments(LoginFragment.class);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
+                Log.e("Hata",t.toString());
+            }
+        });
+
+}
+
+    public void lastDogAds() {
+        final Interface[] restInterface = new Interface[1];
+        restInterface[0] = ApiClient.getClient().create(Interface.class);
+        Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getDogAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+                if(response.body()!=null) {
+                    dogsList = response.body().getData().getItems();
+                    if (getActivity() != null) {
+                        adapter = new AdsAdaptor(getContext(), R.layout.lastads_row, dogsList);
+                        Log.i("Bilgi", response.toString());
+                        dogAds.setAdapter(adapter);
+                    }
+                }
+                else {
+                    replaceFragments(LoginFragment.class);
+                }
             }
 
             @Override
@@ -284,70 +289,56 @@ public class AdsFragment extends Fragment {
 
     }
 
-    public void lastBirdAds() {
- /*
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<AdsModel>> call = restInterface[0].getBirdAds();
-        call.enqueue(new Callback<List<AdsModel>>() {
-            @Override
-            public void onResponse(Call<List<AdsModel>> call, Response<List<AdsModel>> response) {
-                listDataList=response.body();
-                adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,listDataList);
-                Log.i("Bilgi",response.toString());
-                birdAds.setAdapter(adapter);
-            }
-
-            @Override
-            public void onFailure(Call<List<AdsModel>> call, Throwable t) {
-                Log.e("Hata",t.toString());
-            }
-        }); */
-
-    }
-
     public void lastCatAds() {
-
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<PostModel>> call = restInterface[0].getCatAds("Bearer " +tokenManager.getToken());
-        call.enqueue(new Callback<List<PostModel>>() {
+        Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getCatAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
-                catsList=response.body();
-                if (getActivity()!=null){
-                adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,catsList);
-                Log.i("Bilgi",response.toString());
-                birdAds.setAdapter(adapter);}
+            public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+                if(response.body()!=null) {
+                    catsList = response.body().getData().getItems();
+                    if (getActivity() != null) {
+                        adapter = new AdsAdaptor(getContext(), R.layout.lastads_row, catsList);
+                        Log.i("Bilgi", response.toString());
+                        catAds.setAdapter(adapter);
+                    }
+                }
+                else {
+                    replaceFragments(LoginFragment.class);
+                }
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });
-
     }
 
 
     public void lastOtherAds() {
-
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<PostModel>> call = restInterface[0].getOtherAds("Bearer " +tokenManager.getToken());
-        call.enqueue(new Callback<List<PostModel>>() {
+        Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getOtherAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
-                lastothers=response.body();
-
-                if (getActivity()!=null){
-                adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,lastothers);
-                Log.i("Bilgi",response.toString());
-                otherAds.setAdapter(adapter);
-            } }
+            public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+                if(response.body()!=null) {
+                    lastothers = response.body().getData().getItems();
+                    if (getActivity() != null) {
+                        adapter = new AdsAdaptor(getContext(), R.layout.lastads_row, lastothers);
+                        Log.i("Bilgi", response.toString());
+                        otherAds.setAdapter(adapter);
+                    }
+                }
+                else {
+                    replaceFragments(LoginFragment.class);
+                }
+            }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });

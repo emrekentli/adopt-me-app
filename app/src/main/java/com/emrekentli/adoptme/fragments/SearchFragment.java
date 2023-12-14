@@ -19,8 +19,10 @@ import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.controller.SearchAdaptor;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
-import com.emrekentli.adoptme.model.SearchModel;
+import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.DataResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +34,14 @@ import retrofit2.Response;
 public class SearchFragment extends Fragment {
     private ListView founds;
     private SearchAdaptor adapter;
+    TokenManager tokenManager;
     Integer profilMi=0;
-    private List<SearchModel> listDataList;
+    private List<PostModel> listDataList;
 
     private Interface apiInterface;
     final SearchAdaptor listViewAdapter[]=new SearchAdaptor[1];
 
-    ArrayList<SearchModel> foundData;
+    ArrayList<PostModel> foundData;
     ArrayList<PostModel> foundDataOwn;
     String city;
     ListView list;
@@ -48,7 +51,7 @@ public class SearchFragment extends Fragment {
                              Bundle savedInstanceState) {
         // bu fragment'in layout'unu hazır hale getirelim
         View view = inflater.inflate(R.layout.search_fragment, container, false);
-
+        tokenManager = new TokenManager(getContext());
 
 
         foundData = new ArrayList<>();
@@ -63,13 +66,13 @@ public class SearchFragment extends Fragment {
 
             if (profilMi==1) {
 
-                SearchModel repo = listDataList.get(position);
+                PostModel repo = listDataList.get(position);
 
                 replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
             } else {
 
-                SearchModel repo = foundData.get(position);
+                PostModel repo = foundData.get(position);
 
                 replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
@@ -175,7 +178,7 @@ public class SearchFragment extends Fragment {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
 
-        Call<List<SearchModel>> repos;
+        Call<List<PostModel>> repos;
         if (city==null) {
             repos = restInterface[0].getSearch(searchValue);
         } else if (city.equals("Hepsi"))  {
@@ -184,9 +187,9 @@ public class SearchFragment extends Fragment {
             repos = restInterface[0].getAdsSearchWithCity(searchValue, city);
         }
 
-        repos.enqueue(new Callback<List<SearchModel>>() {
+        repos.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(  Call<List<SearchModel>>  call, Response<List<SearchModel>> response) {
+            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
                 if (response.body() != null) {
 
 
@@ -210,7 +213,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<SearchModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
@@ -221,10 +224,10 @@ public class SearchFragment extends Fragment {
     public void getSearchCity(String searchValue,String city) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<SearchModel>> repos = restInterface[0].getAdsSearchWithCity(searchValue,city);
-        repos.enqueue(new Callback<List<SearchModel>>() {
+        Call<List<PostModel>> repos = restInterface[0].getAdsSearchWithCity(searchValue,city);
+        repos.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(  Call<List<SearchModel>>  call, Response<List<SearchModel>> response) {
+            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
                 if (response.body() != null) {
                     foundData.addAll(response.body());
                 }
@@ -244,7 +247,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<SearchModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
@@ -257,11 +260,11 @@ public class SearchFragment extends Fragment {
         restInterface[0] = ApiClient.getClient().create(Interface.class);
 
 
-        Call<List<SearchModel>>  repos = restInterface[0].getAdsSearch();
+        Call<List<PostModel>>  repos = restInterface[0].getAdsSearch();
 
-        repos.enqueue(new Callback<List<SearchModel>>() {
+        repos.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(  Call<List<SearchModel>>  call, Response<List<SearchModel>> response) {
+            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
                 if (response.body() != null) {
 
 
@@ -284,7 +287,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<SearchModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
@@ -297,19 +300,21 @@ public class SearchFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<SearchModel>> call = restInterface[0].getOwnAdsId(userId);
-        call.enqueue(new Callback<List<SearchModel>>() {
+        tokenManager = new TokenManager(getContext());
+        String token = tokenManager.getToken();
+        Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getOwnAds("Bearer " + token);
+        call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(Call<List<SearchModel>> call, Response<List<SearchModel>> response) {
+            public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
 
-                listDataList=response.body();
+                listDataList=response.body().getData().getItems();
                 adapter=new SearchAdaptor(getContext(),R.layout.search_row,listDataList);
                 Log.i("Bilgi",response.toString());
                 founds.setAdapter(adapter);
             }
 
             @Override
-            public void onFailure(Call<List<SearchModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
 
                 Toast.makeText(getContext(), "Hiç ilan paylaşmadınız.", Toast.LENGTH_SHORT).show();
 
@@ -323,11 +328,11 @@ public class SearchFragment extends Fragment {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
 
-        Call<List<SearchModel>>  repos = restInterface[0].getOtherAdsSearch();
+        Call<List<PostModel>>  repos = restInterface[0].getOtherAdsSearch();
 
-        repos.enqueue(new Callback<List<SearchModel>>() {
+        repos.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(  Call<List<SearchModel>>  call, Response<List<SearchModel>> response) {
+            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
                 if (response.body() != null) {
 
 
@@ -350,7 +355,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<SearchModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
@@ -375,7 +380,7 @@ public class SearchFragment extends Fragment {
 
 
 
-    public void replaceFragmentsAds(Class fragmentClass, Integer adid) {
+    public void replaceFragmentsAds(Class fragmentClass, String adid) {
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -384,7 +389,7 @@ public class SearchFragment extends Fragment {
         }
         // Insert the fragment by replacing any existing fragment
         Bundle args = new Bundle();
-        args.putInt("adid",adid);
+        args.putString("adid",adid);
         fragment.setArguments(args);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)

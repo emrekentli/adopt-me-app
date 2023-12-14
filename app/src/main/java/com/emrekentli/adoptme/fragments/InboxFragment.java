@@ -17,8 +17,10 @@ import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.controller.ProfileAdsAdaptor;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.DataResponse;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,28 +33,21 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class InboxFragment extends Fragment {
-    GoogleSignInClient mGoogleSignInClient;
-    String  userId;
     private List<PostModel> myList;
     ListView myAdsListView;
     private ProfileAdsAdaptor adapter;
-    FirebaseUser user;
-    String providerId,name,email,uid;
-    Uri photoUrl;
+    TokenManager tokenManager;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // bu fragment'in layout'unu hazır hale getirelim
 
         View view = inflater.inflate(R.layout.inbox_fragment, container, false);
-
+        tokenManager = new TokenManager(getContext());
 
         myAdsListView = view.findViewById(R.id.myAdsListView);
         setClicks();
-
-         user = FirebaseAuth.getInstance().getCurrentUser();
-
-
         return view;
 
     }
@@ -61,44 +56,23 @@ public class InboxFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        getAccount();
         getOwnAds();
-
-    }
-
-    public void getAccount() {
-        if (user != null) {
-            for (UserInfo profile : user.getProviderData()) {
-                // Id of the provider (ex: google.com)
-                 providerId = profile.getProviderId();
-
-                // UID specific to the provider
-                 uid = profile.getUid();
-
-                // Name, email address, and profile photo Url
-                 name = profile.getDisplayName();
-                 email = profile.getEmail();
-                photoUrl = profile.getPhotoUrl();
-            }
-        }
     }
 
 
-    public void setClicks () {
+    public void setClicks() {
 
         myAdsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
 
-                    PostModel repo = myList.get(position);
+                PostModel repo = myList.get(position);
 
-                    replaceFragmentsAds(AdDetailFragment.class,repo.getId());
+                replaceFragmentsAds(AdDetailFragment.class, repo.getId());
 
-               BottomNavigationView navigation = getActivity().findViewById(R.id.bottom_navigation);
+                BottomNavigationView navigation = getActivity().findViewById(R.id.bottom_navigation);
                 navigation.setClickable(true);
-
 
 
             }
@@ -111,43 +85,38 @@ public class InboxFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<PostModel>> call = restInterface[0].getOwnAds(uid);
-        call.enqueue(new Callback<List<PostModel>>() {
+        Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getOwnAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
-                myList=response.body();
+            public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+
+                if (response.body() != null) {
+                    myList = response.body().getData().getItems();
+
+                    if (getActivity() != null) {
+                        adapter = new ProfileAdsAdaptor(getContext(), R.layout.profileads_row, myList, getActivity());
+                        Log.i("Bilgi", response.toString());
+                        myAdsListView.setAdapter(adapter);
+                    }
 
 
-                if (getActivity()!=null){
-                    adapter=new ProfileAdsAdaptor(getContext(),R.layout.profileads_row,myList,getActivity());
-                    Log.i("Bilgi",response.toString());
-                    myAdsListView.setAdapter(adapter);
+                    if (myList.toString().equals("[]")) {
+
+
+                        replaceFragments(AddYourFirstAdFragment.class);
+
+
+                    }
                 }
-
-
-              
-               if (myList.toString().equals("[]")) {
-
-
-                       replaceFragments(AddYourFirstAdFragment.class);
-
-
-
-               }
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
-
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Toast.makeText(getContext(), "Hiç ilan paylaşmadınız.", Toast.LENGTH_SHORT).show();
-
-
-
             }
         });
 
     }
-
 
 
     public void replaceFragments(Class fragmentClass) {
@@ -173,13 +142,12 @@ public class InboxFragment extends Fragment {
         }
         // Insert the fragment by replacing any existing fragment
         Bundle args = new Bundle();
-        args.putString("adid",adid);
+        args.putString("adid", adid);
         fragment.setArguments(args);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)
                 .commit();
     }
-
 
 
 }

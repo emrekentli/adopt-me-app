@@ -1,6 +1,7 @@
 package com.emrekentli.adoptme.controller;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,12 +42,7 @@ public class AdsAdaptor extends ArrayAdapter<PostModel> {
 
             convertView=inflater.inflate(R.layout.lastads_row,null,true);
         }
-        PostModel listdata=getItem(position);
-
-
-
-
-
+            PostModel listdata=getItem(position);
             ImageView img = (ImageView) convertView.findViewById(R.id.image_view);
             TextView txtCountry = convertView.findViewById(R.id.country);
 
@@ -54,11 +50,11 @@ public class AdsAdaptor extends ArrayAdapter<PostModel> {
 
 
             txtCountry.setText(listdata.getCity().getName());
-            txtName.setText(listdata.getAnimalType().getName());
+            txtName.setText(listdata.getName());
 
            Picasso
                     .get()
-                    .load(listdata.getName())
+                    .load(listdata.getMainImage())
                     .resize(400,400)
                     .centerCrop()
                     .into(img);

@@ -134,7 +134,6 @@
                                 android:scrollbarAlwaysDrawVerticalTrack="false"
                                 android:scrollbars="horizontal"
                                 android:stretchMode="columnWidth">
-
                             </GridView>
                         </LinearLayout>
                     </FrameLayout>
