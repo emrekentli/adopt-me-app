@@ -50,13 +50,13 @@ public class SearchAdaptor extends ArrayAdapter<SearchModel> {
         TextView txtAltDetail=convertView.findViewById(R.id.ad_Detail2);
 
         txtAltDetail.setText(listdata.getAdAltcategory());
-        txtName.setText(listdata.getAdName());
-        txtCountry.setText(listdata.getCountry());
-        txtDetail.setText(String.valueOf(listdata.getDate()));
+        txtName.setText(listdata.getName());
+        txtCountry.setText("listdata.getCity().getName()");
+        txtDetail.setText(String.valueOf(listdata.getCreated()));
 
         Picasso
                 .get()
-                .load(listdata.getAdImage())
+                .load(listdata.getMainImage())
                 .fit()
                 .into(img);
 

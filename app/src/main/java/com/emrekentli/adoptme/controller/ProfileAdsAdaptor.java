@@ -25,7 +25,7 @@ import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.fragments.EditYourAdsFragment;
-import com.emrekentli.adoptme.model.AdsModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.emrekentli.adoptme.model.SearchModel;
 import com.squareup.picasso.Picasso;
 
@@ -35,14 +35,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
-    List<AdsModel> listData;
+public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
+    List<PostModel> listData;
     Context context;
     int resource;
     FragmentActivity fragmentx;
 
 
-    public ProfileAdsAdaptor(@NonNull Context context, int resource, @NonNull List<AdsModel> listData,FragmentActivity fragmentx) {
+    public ProfileAdsAdaptor(@NonNull Context context, int resource, @NonNull List<PostModel> listData, FragmentActivity fragmentx) {
 
         super(context, resource, listData);
 
@@ -63,8 +63,8 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
             LayoutInflater layoutInflater=(LayoutInflater)getContext().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             convertView=layoutInflater.inflate(R.layout.profileads_row,null,false);
         }
-        AdsModel listdata=getItem(position);
-
+        PostModel listdata=getItem(position);
+        Integer viewCount = 0;
 
 
 
@@ -78,40 +78,30 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
         Button deleteBt = convertView.findViewById(R.id.deleteBt);
         TextView adViewValue = convertView.findViewById(R.id.ad_ViewValue);
 
-        Integer confirmation = listdata.getConfirmation();
-        if (confirmation==1) {
+        Boolean confirmation = listdata.getVerified();
+        if (confirmation==true) {
             txtStatus.setText("YAYINDA");
 
-        } else if (confirmation==0) {
+        } else if (confirmation==null) {
             txtStatus.setText("İNCELENİYOR.");
 
-        } else if (confirmation==-1) {
-
-            txtStatus.setText("REDDEDİLDİ \n" +  listdata.getReason());
-
-
+        } else if (confirmation== false) {
+            txtStatus.setText("REDDEDİLDİ");
         }
-        else if (confirmation==-2) {
+        adViewValue.setText("Görüntülenme: " + String.valueOf(viewCount));
 
-            txtStatus.setText("YAYINDA DEĞİL.");
-
-        }
-
-
-        adViewValue.setText("Görüntülenme: " + String.valueOf(listdata.getAdViews()));
-
-        txtName.setText(listdata.getAdName());
-        adDetail2.setText("\n" + listdata.getAdDetail());
-        adDetail.setText(listdata.getAdAltcategory());
+        txtName.setText(listdata.getName());
+        adDetail2.setText("\n" + listdata.getDescription());
+        adDetail.setText(listdata.getAnimalType().getName());
 
         Picasso
                 .get()
-                .load(listdata.getAdImage())
+                .load(listdata.getMainImage())
                 .into(img);
 
 
            if (adDetail2.length()>50) {
-          String detail=listdata.getAdDetail().substring(0,50)+"...";
+          String detail=listdata.getDescription().substring(0,50)+"...";
             adDetail2.setText(detail);
               }
 
@@ -139,7 +129,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
     }
 
 
-    public void replaceFragmentsAds(Class fragmentClass, Integer adid) {
+    public void replaceFragmentsAds(Class fragmentClass, String adid) {
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -148,7 +138,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
         }
         // Insert the fragment by replacing any existing fragment
         Bundle args = new Bundle();
-        args.putInt("adid",adid);
+        args.putString("adid",adid);
         fragment.setArguments(args);
         FragmentManager fragmentManager = fragmentx.getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)
@@ -156,7 +146,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
     }
 
 
-    public void delete (Integer id) {
+    public void delete (String id) {
         new AlertDialog.Builder(context)
                 .setTitle("İlan Silme İşlemi")
                 .setMessage("Bu ilanı silmek istediğinize emin misiniz?")
@@ -189,8 +179,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
 
     }
 
-    public void deleteAds (Integer id) {
-
+    public void deleteAds (String id) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
         Call<SearchModel> call = restInterface[0].deleteAds(id);
@@ -218,7 +207,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<AdsModel> {
 
     }
 
-    public void unConfirmation (Integer id) {
+    public void unConfirmation (String id) {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);

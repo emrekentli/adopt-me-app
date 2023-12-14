@@ -32,7 +32,7 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
-import com.emrekentli.adoptme.model.AdsModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -70,7 +70,7 @@ public class NewAdd_Fragment extends Fragment {
     TextView closePhoto1,closePhoto2;
     Integer selectedPlace = null;
     Boolean finishUpload= false;
-    private List<AdsModel> addNewList;
+    private List<PostModel> addNewList;
 
     private String[] spinnerCityList={"Şehir Seçiniz.","Tüm Türkiye","Adana", "Adıyaman", "Afyon", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
             "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale",
@@ -248,10 +248,10 @@ public class NewAdd_Fragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<AdsModel> call = restInterface[0].addNewAdd(userId,ownerName,telephoneTv.getText().toString(),"Sahiplenme",tittle,detail,category,altCategory,age,null,city,null,photo1,photo2,altCategory,date,gender,1);
-        call.enqueue(new Callback<AdsModel>() {
+        Call<PostModel> call = restInterface[0].addNewAdd(userId,ownerName,telephoneTv.getText().toString(),"Sahiplenme",tittle,detail,category,altCategory,age,null,city,null,photo1,photo2,altCategory,date,gender,1);
+        call.enqueue(new Callback<PostModel>() {
             @Override
-            public void onResponse(Call<AdsModel> call, Response<AdsModel> response) {
+            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
                 if (response.isSuccessful()) {
 
                     replaceFragments(InboxFragment.class);
@@ -267,7 +267,7 @@ public class NewAdd_Fragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<AdsModel> call, Throwable t) {
+            public void onFailure(Call<PostModel> call, Throwable t) {
                 Log.e("Hata",t.toString());
                 Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
             }

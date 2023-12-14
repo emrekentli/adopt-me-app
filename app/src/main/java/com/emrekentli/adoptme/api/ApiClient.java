@@ -8,10 +8,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     private static Retrofit retrofit=null;
     private static Retrofit retrofit2=null;
+    private static String BASE_URL = "http://10.0.2.2:8080";
     public static Retrofit getClient() {
 
         retrofit = new Retrofit.Builder()
-                .baseUrl("http://localhost:8080")
+                .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(new OkHttpClient())
                 .build();
@@ -21,7 +22,7 @@ public class ApiClient {
     public static Retrofit getClientVersion() {
 
         retrofit2 = new Retrofit.Builder()
-                .baseUrl("http://localhost:8080")
+                .baseUrl("172.26.240.1:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(new OkHttpClient())
                 .build();

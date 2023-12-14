@@ -83,9 +83,6 @@ public class SearchModel {
         this.adOwnername = adOwnername;
     }
 
-    public String getAdOwnertelephone() {
-        return adOwnertelephone;
-    }
 
     public void setAdOwnertelephone(String adOwnertelephone) {
         this.adOwnertelephone = adOwnertelephone;
@@ -99,7 +96,7 @@ public class SearchModel {
         this.adType = adType;
     }
 
-    public String getAdName() {
+    public String getName() {
         return adName;
     }
 
@@ -107,7 +104,7 @@ public class SearchModel {
         this.adName = adName;
     }
 
-    public String getAdDetail() {
+    public String getDescription() {
         return adDetail;
     }
 
@@ -131,7 +128,7 @@ public class SearchModel {
         this.adAltcategory = adAltcategory;
     }
 
-    public String getAdAge() {
+    public String getAge() {
         return adAge;
     }
 
@@ -147,9 +144,6 @@ public class SearchModel {
         this.confirmation = confirmation;
     }
 
-    public String getCountry() {
-        return country;
-    }
 
     public void setCountry(String country) {
         this.country = country;
@@ -163,7 +157,7 @@ public class SearchModel {
         this.reason = reason;
     }
 
-    public String getAdImage() {
+    public String getMainImage() {
         return adImage;
     }
 
@@ -187,7 +181,7 @@ public class SearchModel {
         this.tags = tags;
     }
 
-    public String getDate() {
+    public String getCreated() {
         return date;
     }
 
@@ -195,7 +189,7 @@ public class SearchModel {
         this.date = date;
     }
 
-    public String getAdSex() {
+    public String getGender() {
         return adSex;
     }
 

@@ -17,7 +17,7 @@ import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.controller.ProfileAdsAdaptor;
-import com.emrekentli.adoptme.model.AdsModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,7 +33,7 @@ import retrofit2.Response;
 public class InboxFragment extends Fragment {
     GoogleSignInClient mGoogleSignInClient;
     String  userId;
-    private List<AdsModel> myList;
+    private List<PostModel> myList;
     ListView myAdsListView;
     private ProfileAdsAdaptor adapter;
     FirebaseUser user;
@@ -92,7 +92,7 @@ public class InboxFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
 
-                    AdsModel repo = myList.get(position);
+                    PostModel repo = myList.get(position);
 
                     replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
@@ -111,10 +111,10 @@ public class InboxFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<AdsModel>> call = restInterface[0].getOwnAds(uid);
-        call.enqueue(new Callback<List<AdsModel>>() {
+        Call<List<PostModel>> call = restInterface[0].getOwnAds(uid);
+        call.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(Call<List<AdsModel>> call, Response<List<AdsModel>> response) {
+            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
                 myList=response.body();
 
 
@@ -137,7 +137,7 @@ public class InboxFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<AdsModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
 
                 Toast.makeText(getContext(), "Hiç ilan paylaşmadınız.", Toast.LENGTH_SHORT).show();
 
@@ -164,7 +164,7 @@ public class InboxFragment extends Fragment {
                 .commit();
     }
 
-    public void replaceFragmentsAds(Class fragmentClass, Integer adid) {
+    public void replaceFragmentsAds(Class fragmentClass, String adid) {
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -173,7 +173,7 @@ public class InboxFragment extends Fragment {
         }
         // Insert the fragment by replacing any existing fragment
         Bundle args = new Bundle();
-        args.putInt("adid",adid);
+        args.putString("adid",adid);
         fragment.setArguments(args);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)

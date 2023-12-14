@@ -56,12 +56,19 @@ public class WelcomeFragment extends Fragment {
 
 
         registerButton = view.findViewById(R.id.registerButton);
-        loginButton = view.findViewById(R.id.loginButton);
+        loginButton = view.findViewById(R.id.loginButtonWelcome);
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 replaceFragments(RegisterFragment.class);
+            }
+        });
+
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                replaceFragments(LoginFragment.class);
             }
         });
 

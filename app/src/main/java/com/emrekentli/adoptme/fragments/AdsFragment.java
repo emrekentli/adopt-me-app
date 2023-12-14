@@ -24,10 +24,10 @@ import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.controller.AdsAdaptor;
-import com.emrekentli.adoptme.model.AdsModel;
-import com.emrekentli.adoptme.model.UserModel;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.emrekentli.adoptme.database.TokenManager;
+import com.emrekentli.adoptme.model.PostModel;
+import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.DataResponse;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
@@ -39,14 +39,11 @@ import retrofit2.Response;
 public class AdsFragment extends Fragment {
     private GridView lastAds,dogAds,birdAds,otherAds;
     private AdsAdaptor adapter;
-    GoogleSignInClient mGoogleSignInClient;
-    String  userId;
-    private List<AdsModel> lastList,dogsList,catsList,lastothers;
+    private List<PostModel> lastList,dogsList,catsList,lastothers;
     LinearLayout loading;
     Button searchBt,showDogAdsBt,showCatAdsBt,showOtherAdsBt,showLastAdsBt,wpButton,allAdsButton;
     EditText searchTv;
-    private List<UserModel> userControl;
-    GoogleSignInAccount account;
+    TokenManager tokenManager;
     LinearLayout ly1,ly2,ly3,ly4;
     private String[] iller={"Hepsi","Adana", "Adıyaman", "Afyon", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "İçel (Mersin)", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"};
 
@@ -59,6 +56,7 @@ public class AdsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // bu fragment'in layout'unu hazır hale getirelim
+        tokenManager = new TokenManager(getActivity().getApplicationContext());
         view = inflater.inflate(R.layout.fragment_ads, container, false);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -75,13 +73,8 @@ public class AdsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
         setCity();
-        lastAds();
         lastDogAds();
-        lastCatAds();
-        lastOtherAds();
-
      //   loading.setVisibility(View.GONE);
 
 
@@ -112,15 +105,6 @@ public class AdsFragment extends Fragment {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-
-
-        //setWidth(ly1,width);
-        //setWidth(ly2,width);
-        //setWidth(ly3,width);
-        //setWidth(ly4,width);
-
 
         LinearLayout action;
         BottomNavigationView menu;
@@ -196,7 +180,7 @@ public class AdsFragment extends Fragment {
                                     int position, long id) {
 
                 // DO something
-                AdsModel repo = lastList.get(position);
+                PostModel repo = lastList.get(position);
 
                 replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
@@ -210,7 +194,7 @@ public class AdsFragment extends Fragment {
                                     int position, long id) {
 
                 // DO something
-                AdsModel repo = dogsList.get(position);
+                PostModel repo = dogsList.get(position);
 
                 replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
@@ -224,7 +208,7 @@ public class AdsFragment extends Fragment {
                                     int position, long id) {
 
                 // DO something
-                AdsModel repo = catsList.get(position);
+                PostModel repo = catsList.get(position);
 
                 replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
@@ -238,7 +222,7 @@ public class AdsFragment extends Fragment {
                                     int position, long id) {
 
                 // DO something
-                AdsModel repo = lastothers.get(position);
+                PostModel repo = lastothers.get(position);
 
                 replaceFragmentsAds(AdDetailFragment.class,repo.getId());
 
@@ -253,10 +237,10 @@ public class AdsFragment extends Fragment {
 
     final Interface[] restInterface = new Interface[1];
     restInterface[0] = ApiClient.getClient().create(Interface.class);
-    Call<List<AdsModel>> call = restInterface[0].getAds();
-    call.enqueue(new Callback<List<AdsModel>>() {
+    Call<List<PostModel>> call = restInterface[0].getAds("Bearer " +tokenManager.getToken());
+    call.enqueue(new Callback<List<PostModel>>() {
         @Override
-        public void onResponse(Call<List<AdsModel>> call, Response<List<AdsModel>> response) {
+        public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
             lastList=response.body();
 
 
@@ -270,7 +254,7 @@ public class AdsFragment extends Fragment {
         }
 
         @Override
-        public void onFailure(Call<List<AdsModel>> call, Throwable t) {
+        public void onFailure(Call<List<PostModel>> call, Throwable t) {
             Log.e("Hata",t.toString());
         }
     });
@@ -281,11 +265,11 @@ public class AdsFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<AdsModel>> call = restInterface[0].getDogAds();
-        call.enqueue(new Callback<List<AdsModel>>() {
+        Call<ApiResponse<DataResponse<PostModel>>> call = restInterface[0].getDogAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(Call<List<AdsModel>> call, Response<List<AdsModel>> response) {
-                dogsList=response.body();
+            public void onResponse(Call<ApiResponse<DataResponse<PostModel>>> call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+                dogsList=response.body().getData().getItems();
                 if (getActivity()!=null){
                 adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,dogsList);
                 Log.i("Bilgi",response.toString());
@@ -293,7 +277,7 @@ public class AdsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<AdsModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });
@@ -326,10 +310,10 @@ public class AdsFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<AdsModel>> call = restInterface[0].getCatAds();
-        call.enqueue(new Callback<List<AdsModel>>() {
+        Call<List<PostModel>> call = restInterface[0].getCatAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(Call<List<AdsModel>> call, Response<List<AdsModel>> response) {
+            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
                 catsList=response.body();
                 if (getActivity()!=null){
                 adapter=new AdsAdaptor(getContext(),R.layout.lastads_row,catsList);
@@ -338,7 +322,7 @@ public class AdsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<AdsModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });
@@ -350,10 +334,10 @@ public class AdsFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<AdsModel>> call = restInterface[0].getOtherAds();
-        call.enqueue(new Callback<List<AdsModel>>() {
+        Call<List<PostModel>> call = restInterface[0].getOtherAds("Bearer " +tokenManager.getToken());
+        call.enqueue(new Callback<List<PostModel>>() {
             @Override
-            public void onResponse(Call<List<AdsModel>> call, Response<List<AdsModel>> response) {
+            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
                 lastothers=response.body();
 
                 if (getActivity()!=null){
@@ -363,7 +347,7 @@ public class AdsFragment extends Fragment {
             } }
 
             @Override
-            public void onFailure(Call<List<AdsModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });
@@ -403,7 +387,7 @@ public class AdsFragment extends Fragment {
     }
 
 
-    public void replaceFragmentsAds(Class fragmentClass, Integer adid) {
+    public void replaceFragmentsAds(Class fragmentClass, String adid) {
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -412,7 +396,7 @@ public class AdsFragment extends Fragment {
         }
         // Insert the fragment by replacing any existing fragment
         Bundle args = new Bundle();
-        args.putInt("adid",adid);
+        args.putString("adid",adid);
         fragment.setArguments(args);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)

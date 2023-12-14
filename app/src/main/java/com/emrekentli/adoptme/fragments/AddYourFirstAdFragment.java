@@ -46,7 +46,6 @@ public class AddYourFirstAdFragment extends Fragment {
             e.printStackTrace();
         }
         // Insert the fragment by replacing any existing fragment
-
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragmentLayout, fragment)
                 .commit();

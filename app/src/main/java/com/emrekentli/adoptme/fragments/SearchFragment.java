@@ -19,7 +19,7 @@ import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
 import com.emrekentli.adoptme.controller.SearchAdaptor;
-import com.emrekentli.adoptme.model.AdsModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.emrekentli.adoptme.model.SearchModel;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class SearchFragment extends Fragment {
     final SearchAdaptor listViewAdapter[]=new SearchAdaptor[1];
 
     ArrayList<SearchModel> foundData;
-    ArrayList<AdsModel> foundDataOwn;
+    ArrayList<PostModel> foundDataOwn;
     String city;
     ListView list;
     String searchValue=null;
@@ -221,25 +221,12 @@ public class SearchFragment extends Fragment {
     public void getSearchCity(String searchValue,String city) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-
-
-
-
         Call<List<SearchModel>> repos = restInterface[0].getAdsSearchWithCity(searchValue,city);
-
-
-
-
         repos.enqueue(new Callback<List<SearchModel>>() {
             @Override
             public void onResponse(  Call<List<SearchModel>>  call, Response<List<SearchModel>> response) {
                 if (response.body() != null) {
-
-
                     foundData.addAll(response.body());
-
-                    //  Toast.makeText(getContext(), response.body().toString(), Toast.LENGTH_SHORT).show();
-
                 }
 
 

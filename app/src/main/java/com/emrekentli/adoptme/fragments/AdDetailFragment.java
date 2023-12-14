@@ -29,7 +29,7 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
-import com.emrekentli.adoptme.model.AdsModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.emrekentli.adoptme.model.UserModel;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -62,7 +62,7 @@ public class AdDetailFragment extends Fragment {
     String photo1url,photo2url;
     GoogleSignInClient mGoogleSignInClient;
     String  userId;
-    AdsModel repo;
+    PostModel repo;
     CircleImageView profileImage;
     Dialog dialog;
     private List<UserModel> userRepo;
@@ -279,11 +279,11 @@ public class AdDetailFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<AdsModel> call = restInterface[0].view(id);
-        call.enqueue(new Callback<AdsModel>() {
+        Call<PostModel> call = restInterface[0].view(id);
+        call.enqueue(new Callback<PostModel>() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
-            public void onResponse(Call<AdsModel> call, Response<AdsModel> response) {
+            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
 
                 repo= response.body();
 
@@ -292,7 +292,7 @@ public class AdDetailFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<AdsModel> call, Throwable t) {
+            public void onFailure(Call<PostModel> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });
@@ -303,72 +303,50 @@ public class AdDetailFragment extends Fragment {
 
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<AdsModel> call = restInterface[0].getAdDetails(id);
-        call.enqueue(new Callback<AdsModel>() {
+        Call<PostModel> call = restInterface[0].getDescriptions(id);
+        call.enqueue(new Callback<PostModel>() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
-            public void onResponse(Call<AdsModel> call, Response<AdsModel> response) {
+            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
 
                 repo= response.body();
 
-                ownerId =  repo.getAdOwnerid();
+                ownerId =  repo.getOwner().getId();
 
                 getProfileSpecs(ownerId);
 
 
 
 
-            adCountry.setText(repo.getCountry());
-            adName.setText("\n" +repo.getAdName() + "\n");
+            adCountry.setText(repo.getCity().getName());
+            adName.setText("\n" +repo.getName() + "\n");
 
 
-            dateValue.setText(repo.getDate().toString());
+            dateValue.setText(repo.getCreated().toString());
 
-            telephone = repo.getAdOwnertelephone();
+            telephone = repo.getOwner().getPhoneNumber();
 
                 Picasso
                         .get()
-                        .load(repo.getAdImage())
+                        .load(repo.getMainImage())
                         .fit()
                         .into(adimagex);
 
-                photo1url =repo.getAdImage();
+                photo1url =repo.getMainImage();
+                adDetail.setText("\n" + repo.getDescription() + "\n");
+                ageValue.setText(repo.getAge());
+                sexValue.setText(repo.getGender().toString());
+                CategoryValue.setText(repo.getAnimalType().getName());
+                cinsValue.setText(repo.getBreed().getName());
+                memberName.setText(repo.getOwner().getFullName());
 
-               if (repo.getAdImage2()==null) {
-
-                   adimagex2.setVisibility(View.GONE);
-
-               } else {
-
-                   Picasso
-                           .get()
-                           .load(repo.getAdImage2())
-                           .fit()
-                           .into(adimagex2);
-                   photo2url =repo.getAdImage2();
-
-
-               }
-
-
-
-                adDetail.setText("\n" + repo.getAdDetail() + "\n");
-
-                setViewStatic(repo.getId(),repo.getAdViews()+1);
-
-                ageValue.setText(repo.getAdAge());
-                sexValue.setText(repo.getAdSex());
-                CategoryValue.setText(repo.getAdCategory());
-                cinsValue.setText(repo.getAdAltcategory());
-                memberName.setText(repo.getAdOwnername());
-
-                buttonTelephone.setText("Mesaj Gönder +" + repo.getAdOwnertelephone());
+                buttonTelephone.setText("Mesaj Gönder +" + repo.getOwner().getPhoneNumber());
 
 
             }
 
             @Override
-            public void onFailure(Call<AdsModel> call, Throwable t) {
+            public void onFailure(Call<PostModel> call, Throwable t) {
                 Log.e("Hata",t.toString());
             }
         });

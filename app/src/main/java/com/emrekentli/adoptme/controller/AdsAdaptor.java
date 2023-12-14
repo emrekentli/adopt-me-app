@@ -12,19 +12,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.emrekentli.adoptme.R;
-import com.emrekentli.adoptme.model.AdsModel;
+import com.emrekentli.adoptme.model.PostModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class AdsAdaptor extends ArrayAdapter<AdsModel> {
-    List<AdsModel> listData;
+public class AdsAdaptor extends ArrayAdapter<PostModel> {
+    List<PostModel> listData;
     Context context;
     int resource;
 
 
 
-    public AdsAdaptor(@NonNull Context context, int resource, @NonNull List<AdsModel> listData) {
+    public AdsAdaptor(@NonNull Context context, int resource, @NonNull List<PostModel> listData) {
         super(context, resource, listData);
         this.context=context;
         this.resource=resource;
@@ -41,7 +41,7 @@ public class AdsAdaptor extends ArrayAdapter<AdsModel> {
 
             convertView=inflater.inflate(R.layout.lastads_row,null,true);
         }
-        AdsModel listdata=getItem(position);
+        PostModel listdata=getItem(position);
 
 
 
@@ -53,12 +53,12 @@ public class AdsAdaptor extends ArrayAdapter<AdsModel> {
             TextView txtName = convertView.findViewById(R.id.ads_name);
 
 
-            txtCountry.setText(listdata.getCountry());
-            txtName.setText(listdata.getAdAltcategory());
+            txtCountry.setText(listdata.getCity().getName());
+            txtName.setText(listdata.getAnimalType().getName());
 
            Picasso
                     .get()
-                    .load(listdata.getAdImage())
+                    .load(listdata.getName())
                     .resize(400,400)
                     .centerCrop()
                     .into(img);
