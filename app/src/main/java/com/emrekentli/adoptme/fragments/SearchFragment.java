@@ -23,6 +23,7 @@ import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
 import com.emrekentli.adoptme.model.response.ApiResponse;
 import com.emrekentli.adoptme.model.response.DataResponse;
+import com.google.android.gms.common.api.Api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,10 +155,10 @@ public class SearchFragment extends Fragment {
                     default:
 
                         if (city.equals("Hepsi")) {
-                            getSearch(searchValue);
+                            filterWithTitle(searchValue);
 
                         } else  {
-                            getSearchCity(searchValue,city);
+                            filterWithTitleAndCity(searchValue,city);
                         }
 
 
@@ -173,28 +174,99 @@ public class SearchFragment extends Fragment {
         }
     }
 
+    private void filterWithTitleAndCity(String searchValue, String city) {
+        final Interface[] restInterface = new Interface[1];
+        restInterface[0] = ApiClient.getClient().create(Interface.class);
+
+        Call<ApiResponse<DataResponse<PostModel>>> repos;
+        repos = restInterface[0].getAdsSearchWithCity("Bearer " +tokenManager.getToken(),searchValue,null, city);
+
+        repos.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
+            @Override
+            public void onResponse(  Call<ApiResponse<DataResponse<PostModel>>>  call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+                if (response.body() != null) {
+                    foundData.addAll(response.body().getData().getItems());
+                    //  Toast.makeText(getContext(), response.body().toString(), Toast.LENGTH_SHORT).show();
+
+                }
+
+
+                if (foundData.size() > 0) {
+                    listViewAdapter[0] = new SearchAdaptor(getActivity(),R.layout.search_row, foundData);
+                    founds.setAdapter(listViewAdapter[0]);
+                } else {
+
+                    Toast.makeText(getActivity(), "Herhangi bir ilan bulunamadı...", Toast.LENGTH_SHORT).show();
+                    replaceFragments(AdsFragment.class);
+                }
+
+                Log.i("Bilgi",response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
+                Log.d(TAG, "Error: " + t.toString());
+            }
+
+        });
+    }
+
+    private void filterWithTitle(String searchValue) {
+        final Interface[] restInterface = new Interface[1];
+        restInterface[0] = ApiClient.getClient().create(Interface.class);
+
+        Call<ApiResponse<DataResponse<PostModel>>> repos;
+        repos = restInterface[0].getAdsSearchWithCity("Bearer " +tokenManager.getToken(),searchValue,null, null);
+
+        repos.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
+            @Override
+            public void onResponse(  Call<ApiResponse<DataResponse<PostModel>>>  call, Response<ApiResponse<DataResponse<PostModel>>> response) {
+                if (response.body() != null) {
+                    foundData.addAll(response.body().getData().getItems());
+                    //  Toast.makeText(getContext(), response.body().toString(), Toast.LENGTH_SHORT).show();
+
+                }
+
+
+                if (foundData.size() > 0) {
+                    listViewAdapter[0] = new SearchAdaptor(getActivity(),R.layout.search_row, foundData);
+                    founds.setAdapter(listViewAdapter[0]);
+                } else {
+
+                    Toast.makeText(getActivity(), "Herhangi bir ilan bulunamadı...", Toast.LENGTH_SHORT).show();
+                    replaceFragments(AdsFragment.class);
+                }
+
+                Log.i("Bilgi",response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
+                Log.d(TAG, "Error: " + t.toString());
+            }
+
+        });
+    }
+
 
     public void getSearch(String searchValue) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
 
-        Call<List<PostModel>> repos;
+        Call<ApiResponse<DataResponse<PostModel>>> repos;
         if (city==null) {
-            repos = restInterface[0].getSearch(searchValue);
+            repos = restInterface[0].getAdsSearchWithCity("Bearer " +tokenManager.getToken(),searchValue,null,null);
         } else if (city.equals("Hepsi"))  {
-            repos = restInterface[0].getSearch(searchValue);
+            repos = restInterface[0].getAdsSearchWithCity("Bearer " +tokenManager.getToken(),null,searchValue,null);
         } else {
-            repos = restInterface[0].getAdsSearchWithCity(searchValue, city);
+            repos = restInterface[0].getAdsSearchWithCity("Bearer " +tokenManager.getToken(),null,searchValue, city);
         }
 
-        repos.enqueue(new Callback<List<PostModel>>() {
+        repos.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
+            public void onResponse(  Call<ApiResponse<DataResponse<PostModel>>>  call, Response<ApiResponse<DataResponse<PostModel>>> response) {
                 if (response.body() != null) {
-
-
-                   foundData.addAll(response.body());
-
+                   foundData.addAll(response.body().getData().getItems());
                   //  Toast.makeText(getContext(), response.body().toString(), Toast.LENGTH_SHORT).show();
 
                 }
@@ -213,7 +285,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
@@ -224,12 +296,12 @@ public class SearchFragment extends Fragment {
     public void getSearchCity(String searchValue,String city) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<List<PostModel>> repos = restInterface[0].getAdsSearchWithCity(searchValue,city);
-        repos.enqueue(new Callback<List<PostModel>>() {
+        Call<ApiResponse<DataResponse<PostModel>>> repos = restInterface[0].getAdsSearchWithCity("Bearer " +tokenManager.getToken(),null,searchValue,city);
+        repos.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
+            public void onResponse(  Call<ApiResponse<DataResponse<PostModel>>>  call, Response<ApiResponse<DataResponse<PostModel>>> response) {
                 if (response.body() != null) {
-                    foundData.addAll(response.body());
+                    foundData.addAll(response.body().getData().getItems());
                 }
 
 
@@ -247,7 +319,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
@@ -260,15 +332,15 @@ public class SearchFragment extends Fragment {
         restInterface[0] = ApiClient.getClient().create(Interface.class);
 
 
-        Call<List<PostModel>>  repos = restInterface[0].getAdsSearch();
+        Call<ApiResponse<DataResponse<PostModel>>>  repos = restInterface[0].getAllPosts("Bearer " +tokenManager.getToken());
 
-        repos.enqueue(new Callback<List<PostModel>>() {
+        repos.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
+            public void onResponse(  Call<ApiResponse<DataResponse<PostModel>>>  call, Response<ApiResponse<DataResponse<PostModel>>> response) {
                 if (response.body() != null) {
 
 
-                    foundData.addAll(response.body());
+                    foundData.addAll(response.body().getData().getItems());
                     Log.i("Bilgi",response.toString());
                    //   Toast.makeText(getContext(), response.body().toString(), Toast.LENGTH_SHORT).show();
 
@@ -287,7 +359,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 

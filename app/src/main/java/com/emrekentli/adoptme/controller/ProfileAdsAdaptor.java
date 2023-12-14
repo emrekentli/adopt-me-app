@@ -179,9 +179,8 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
     }
 
     public void deleteAds (String id) {
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<PostModel> call = restInterface[0].deleteAds(id);
+        final Interface restInterface = new ApiClient().getClient().create(Interface.class);
+        Call<PostModel> call = restInterface.deleteAds(id);
         call.enqueue(new Callback<PostModel>() {
             @Override
             public void onResponse(Call<PostModel> call, Response<PostModel> response) {

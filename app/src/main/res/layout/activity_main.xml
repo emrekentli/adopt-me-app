@@ -46,14 +46,6 @@
                 android:background="#673AB7"
                 android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/drawerMenuButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="#00FFFFFF"
-                    android:scaleType="center"
-                    app:srcCompat="@android:drawable/ic_dialog_dialer" />
 
                 <TextView
                     android:id="@+id/textView2"

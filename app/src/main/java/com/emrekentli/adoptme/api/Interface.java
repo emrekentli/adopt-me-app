@@ -8,6 +8,7 @@ import com.emrekentli.adoptme.model.request.RegisterRequest;
 import com.emrekentli.adoptme.model.response.AuthenticationResponse;
 import com.emrekentli.adoptme.model.response.DataResponse;
 import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 
 import java.util.List;
 
@@ -21,23 +22,15 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface Interface {
 
 
-    @GET("ads")
-    Call<List<PostModel>> getAdsSearch();
+
 
     @GET("ads/others")
     Call<List<PostModel>> getOtherAdsSearch();
-
-    @GET("search/{tags}")
-    Call<List<PostModel>> getSearch(@Path("tags") String tags);
-
-
-    @GET("search/{city}/{tags}")
-    Call<List<PostModel>> getAdsSearchWithCity(@Path("tags") String tags,  @Path("city") String city);
-
 
     @DELETE("ads/id/{id}")
     Call<PostModel> deleteAds(@Path("id") String id);
@@ -126,6 +119,9 @@ public interface Interface {
     @POST("auth/login")
     Call<ApiResponse<AuthenticationResponse>> loginUser(@Body LoginRequest loginReq);
 
+    @GET("posts")
+    Call<ApiResponse<DataResponse<PostModel>>> getAllPosts(@Header("Authorization") String authToken);
+
     @GET("posts/dogs")
     Call<ApiResponse<DataResponse<PostModel>>> getDogAds(@Header("Authorization") String authToken);
     @GET("posts/cats")
@@ -135,6 +131,8 @@ public interface Interface {
 
     @GET("posts")
     Call<ApiResponse<DataResponse<PostModel>>> getAds(@Header("Authorization") String authToken);
+    @GET("posts/filter")
+    Call<ApiResponse<DataResponse<PostModel>>> getAdsSearchWithCity(@Header("Authorization") String authToken,@Query("title") String title,@Query("searchValue") String searchValue,@Query("cityName") String cityName);
 
     @GET("posts/{id}")
     Call<ApiResponse<PostModel>> getById(@Header("Authorization") String authToken,@Path("id") String id);

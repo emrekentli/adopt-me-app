@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             redirectToLogin();
         }
         fragmentLayout = findViewById(R.id.fragmentLayout);
-        drawerMenuButton = findViewById(R.id.drawerMenuButton);
         newAddButton = findViewById(R.id.newAddCursor);
 
 
@@ -72,11 +71,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         setNavigationViewListener();
-
-
-        // drawer layout instance to toggle the menu icon to open
-        // drawer and back button to close drawer
-        drawerLayout = findViewById(R.id.my_drawer_layout);
 
         newAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
