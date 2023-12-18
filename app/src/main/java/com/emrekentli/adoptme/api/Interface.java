@@ -3,8 +3,12 @@ package com.emrekentli.adoptme.api;
 import com.emrekentli.adoptme.model.PostModel;
 import com.emrekentli.adoptme.model.UserModel;
 import com.emrekentli.adoptme.model.VersionCheck;
+import com.emrekentli.adoptme.model.dto.AnimalTypeDto;
+import com.emrekentli.adoptme.model.dto.BreedDto;
 import com.emrekentli.adoptme.model.dto.CityDto;
+import com.emrekentli.adoptme.model.dto.DistrictDto;
 import com.emrekentli.adoptme.model.request.LoginRequest;
+import com.emrekentli.adoptme.model.request.PostRequest;
 import com.emrekentli.adoptme.model.request.RegisterRequest;
 import com.emrekentli.adoptme.model.response.AuthenticationResponse;
 import com.emrekentli.adoptme.model.response.DataResponse;
@@ -133,5 +137,14 @@ public interface Interface {
     Call<Void> deleteAds(@Path("id") String id);
     @GET("cities")
     Call<ApiResponse<DataResponse<CityDto>>> getCities(@Header("Authorization") String authToken);
+    @GET("animal-types")
+    Call<ApiResponse<DataResponse<AnimalTypeDto>>> getAnimalTypes(@Header("Authorization") String authToken);
+
+    @GET("breeds/filter")
+    Call<ApiResponse<DataResponse<BreedDto>>> getBreeds(@Header("Authorization") String authToken,@Query("animalTypeId") String animalTypeId);
+    @GET("districts/filter")
+    Call<ApiResponse<DataResponse<DistrictDto>>> getDistricts(@Header("Authorization") String authToken, @Query("cityId") String cityId);
+    @POST("posts")
+    Call<ApiResponse<PostModel>> addPost(@Header("Authorization") String authToken, @Body PostRequest request);
 }
 

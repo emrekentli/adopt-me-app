@@ -28,6 +28,16 @@
                 android:textColor="#000000" />
 
             <Spinner
+                android:id="@+id/spinnerDistrict"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_border"
+                android:gravity="start|left"
+                android:textColor="#000000" />
+
+            <Spinner
                 android:id="@+id/spinnerCategory"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -48,21 +58,16 @@
                 android:gravity="start"
                 android:textColor="#000000" />
 
-            <EditText
-                android:id="@+id/ad_altcategory"
+            <Spinner
+                android:id="@+id/spinnerBreed"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_gravity="left"
                 android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_border"
-                android:ems="10"
-                android:hint="Cins yazınız."
-                android:inputType="text"
-                android:paddingStart="5sp"
-                android:paddingLeft="3dp"
-                android:text=""
-                android:textColor="#000000"
-                android:textColorHint="#7A000000" />
+                android:gravity="start"
+                android:textColor="#000000" />
 
             <EditText
                 android:id="@+id/ad_age"

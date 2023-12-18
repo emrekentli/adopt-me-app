@@ -95,17 +95,6 @@
                 android:orientation="horizontal">
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/changeBt"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_margin="10dp"
-                    android:layout_weight="1"
-                    android:background="@color/mor"
-                    android:text="DÜZENLE"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp" />
-
-                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/deleteBt"
                     android:layout_width="match_parent"
                     android:layout_height="20dp"

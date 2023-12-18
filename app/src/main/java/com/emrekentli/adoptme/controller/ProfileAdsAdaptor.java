@@ -24,7 +24,6 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
-import com.emrekentli.adoptme.fragments.EditYourAdsFragment;
 import com.emrekentli.adoptme.model.PostModel;
 import com.squareup.picasso.Picasso;
 
@@ -73,7 +72,6 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
         TextView adDetail = convertView.findViewById(R.id.ad_Detail2);
         TextView adDetail2 = convertView.findViewById(R.id.ad_Detail);
         TextView txtName = convertView.findViewById(R.id.ad_Name);
-        Button changeBt = convertView.findViewById(R.id.changeBt);
         Button deleteBt = convertView.findViewById(R.id.deleteBt);
         TextView adViewValue = convertView.findViewById(R.id.ad_ViewValue);
 
@@ -103,14 +101,6 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
           String detail=listdata.getDescription().substring(0,50)+"...";
             adDetail2.setText(detail);
               }
-
-        changeBt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                replaceFragmentsAds(EditYourAdsFragment.class,listdata.getId());
-            }
-        });
 
 
         deleteBt.setOnClickListener(new View.OnClickListener() {

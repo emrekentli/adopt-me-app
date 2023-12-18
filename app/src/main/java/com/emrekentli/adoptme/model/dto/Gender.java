@@ -13,4 +13,13 @@ public enum Gender {
     public String getValue() {
         return value;
     }
+
+    public static Gender getFromValue(String value) {
+        for (Gender gender : Gender.values()) {
+            if (gender.getValue().equalsIgnoreCase(value)) {
+                return gender;
+            }
+        }
+        throw new IllegalArgumentException("Geçersiz cinsiyet değeri: " + value);
+    }
 }
