@@ -208,29 +208,6 @@ public class AdDetailFragment extends Fragment {
                 .commit();
     }
 
-    public void setViewStatic(Integer id, Integer view) {
-
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<PostModel> call = restInterface[0].view(id);
-        call.enqueue(new Callback<PostModel>() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
-
-                repo = response.body();
-
-
-            }
-
-            @Override
-            public void onFailure(Call<PostModel> call, Throwable t) {
-                Log.e("Hata", t.toString());
-            }
-        });
-
-    }
-
     public void getById(String id) {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);

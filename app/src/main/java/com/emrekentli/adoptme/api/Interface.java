@@ -13,6 +13,7 @@ import com.emrekentli.adoptme.model.request.RegisterRequest;
 import com.emrekentli.adoptme.model.response.AuthenticationResponse;
 import com.emrekentli.adoptme.model.response.DataResponse;
 import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.UserDto;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 
 import java.util.List;
@@ -31,81 +32,8 @@ import retrofit2.http.Query;
 
 public interface Interface {
 
-
-
-
-    @PUT("ads/id/confirmation/{id}")
-    Call<PostModel> unConfirmation(@Path("id") String id);
-
-
-    @FormUrlEncoded
-    @PUT("ads/id/{id}")
-    Call<PostModel> editAds  (@Path("id") String id,
-                              @Field("ad_ownerid") String ad_ownerid,
-                              @Field("ad_ownername") String ad_ownername,
-                              @Field("ad_ownertelephone") String ad_ownertelephone,
-                              @Field("ad_type") String ad_type,
-                              @Field("ad_name") String ad_name,
-                              @Field("ad_detail") String ad_detail,
-                              @Field("ad_category") String ad_category,
-                              @Field("ad_altcategory") String ad_altcategory,
-                              @Field("ad_age") String ad_age,
-                              @Field("confirmation") Integer confirmation,
-                              @Field("country") String country,
-                              @Field("reason") String reason,
-                              @Field("ad_image") String ad_image,
-                              @Field("ad_image2") String ad_image2,
-                              @Field("tags") String tags,
-                              @Field("date") String date,
-                              @Field("ad_sex") String ad_sex);
-
-
-
-    @PUT("ads/view/{id}")
-    Call<PostModel> view  (@Path("id") Integer id);
-
-
-
-
-
-
     @GET("users/my-user")
-    Call<List<UserModel>>getUserSpecs();
-
-    @FormUrlEncoded
-    @POST("posts")
-    Call<PostModel> addNewAdd(@Field("ad_ownerid") String ad_ownerid,
-                              @Field("ad_ownername") String ad_ownername,
-                              @Field("ad_type") String ad_type,
-                              @Field("ad_name") String ad_name,
-                              @Field("ad_detail") String ad_detail,
-                              @Field("ad_category") String ad_category,
-                              @Field("ad_altcategory") String ad_altcategory,
-                              @Field("ad_age") String ad_age,
-                              @Field("confirmation") String confirmation,
-                              @Field("country") String country,
-                              @Field("reason") String reason,
-                              @Field("ad_image") String ad_image,
-                              @Field("ad_image2") String ad_image2,
-                              @Field("tags") String tags,
-                              @Field("date") String date,
-                              @Field("ad_sex") String ad_sex,
-                              @Field("ad_view") Integer ad_view);
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //////////
-
+    Call<ApiResponse<UserDto>> getUserSpecs(@Header("Authorization") String authToken);
 
     @POST("auth/register")
     Call<ApiResponse<Void>> registerUser(@Body RegisterRequest registerRequest);
@@ -134,7 +62,7 @@ public interface Interface {
     @GET("posts/my-user")
     Call<ApiResponse<DataResponse<PostModel>>> getOwnAds(@Header("Authorization") String authToken);
     @DELETE("posts/{id}")
-    Call<Void> deleteAds(@Path("id") String id);
+    Call<Void> deleteAds(@Header("Authorization") String authToken,@Path("id") String id);
     @GET("cities")
     Call<ApiResponse<DataResponse<CityDto>>> getCities(@Header("Authorization") String authToken);
     @GET("animal-types")

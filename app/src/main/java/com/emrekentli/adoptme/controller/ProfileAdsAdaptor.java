@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
 import com.squareup.picasso.Picasso;
 
@@ -38,6 +39,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
     Context context;
     int resource;
     FragmentActivity fragmentx;
+    TokenManager tokenManager;
 
 
     public ProfileAdsAdaptor(@NonNull Context context, int resource, @NonNull List<PostModel> listData, FragmentActivity fragmentx) {
@@ -61,6 +63,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
             LayoutInflater layoutInflater=(LayoutInflater)getContext().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             convertView=layoutInflater.inflate(R.layout.profileads_row,null,false);
         }
+        tokenManager = new TokenManager(getContext());
         PostModel listdata=getItem(position);
         Integer viewCount = 0;
 
@@ -76,15 +79,16 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
         TextView adViewValue = convertView.findViewById(R.id.ad_ViewValue);
 
         Boolean confirmation = listdata.getVerified();
-        if (confirmation==true) {
-            txtStatus.setText("YAYINDA");
-
-        } else if (confirmation==null) {
+        if (confirmation != null) {
+            if (confirmation) {
+                txtStatus.setText("YAYINDA");
+            } else {
+                txtStatus.setText("REDDEDİLDİ");
+            }
+        } else {
             txtStatus.setText("İNCELENİYOR.");
-
-        } else if (confirmation== false) {
-            txtStatus.setText("REDDEDİLDİ");
         }
+
         adViewValue.setText("Görüntülenme: " + String.valueOf(viewCount));
 
         txtName.setText(listdata.getName());
@@ -142,14 +146,6 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
 
                 // Specifying a listener allows you to take an action before dismissing the dialog.
                 // The dialog is automatically dismissed when a dialog button is clicked.
-                .setPositiveButton("Yayından Kaldır", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Continue with delete operation
-
-                        unConfirmation(id);
-                    }
-                })
-
                 // A null listener allows the button to dismiss the dialog and take no further action.
                 .setNegativeButton("Sil", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -170,13 +166,20 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
 
     public void deleteAds (String id) {
         final Interface restInterface = new ApiClient().getClient().create(Interface.class);
-        Call<Void> call = restInterface.deleteAds(id);
+        Call<Void> call = restInterface.deleteAds("Bearer " +tokenManager.getToken(),id);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
 
                     Toast.makeText(getContext(), "İlan başarıyla silindi.", Toast.LENGTH_SHORT).show();
+                    for (PostModel posts : listData) {
+                        if (posts.getId().equals(id)) {
+                            listData.remove(posts);
+                            notifyDataSetChanged();
+                            break;
+                        }
+                    }
 
                 } else {
 
@@ -188,35 +191,6 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Log.e("Hata",t.toString());
-                Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-    }
-
-    public void unConfirmation (String id) {
-
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<PostModel> call = restInterface[0].unConfirmation(id);
-        call.enqueue(new Callback<PostModel>() {
-            @Override
-            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
-                if (response.isSuccessful()) {
-
-                    Toast.makeText(getContext(), "İlan başarıyla yayından kaldırıldı..", Toast.LENGTH_SHORT).show();
-
-                } else {
-
-                    Toast.makeText(getContext(), "İlan kaldırılamadı..", Toast.LENGTH_SHORT).show();
-
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<PostModel> call, Throwable t) {
                 Log.e("Hata",t.toString());
                 Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
             }

@@ -285,6 +285,7 @@ public class NewAdd_Fragment extends Fragment {
         request.setDistrictId(districtId);
         request.setGender(genderValue);
         request.setTitle(title);
+        request.setName(title);
 
         Call<ApiResponse<PostModel>> call = restInterface.addPost("Bearer " + tokenManager.getToken(), request);
         call.enqueue(new Callback<ApiResponse<PostModel>>() {

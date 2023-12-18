@@ -18,7 +18,10 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.UserModel;
+import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.UserDto;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -40,17 +43,10 @@ import retrofit2.Response;
 
 public class ProfileFragment extends Fragment {
     CircleImageView profile_image;
-    GoogleSignInClient mGoogleSignInClient;
-    private static final int RC_SIGN_IN = 007;
-    Button logOutButton, mailButton;
-    GoogleSignInAccount account;
-    private List<UserModel> specList;
-    TextView username,userid,usermail;
-    UserModel repo;
-    private List<UserModel> userList;
-    String providerId,name,email,uid;
-    Uri photoUrl;
-    FirebaseUser user;
+    Button logOutButton;
+    TextView username, userid, usermail;
+    TokenManager tokenManager;
+    String photoUrl;
 
 
     @Override
@@ -58,33 +54,17 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // bu fragment'in layout'unu hazır hale getirelim
         View view = inflater.inflate(R.layout.profile_fragment, container, false);
-
-
-
-
-        account = GoogleSignIn.getLastSignedInAccount(getContext());
-
-
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder (GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .build ();
-
-
-        mGoogleSignInClient = GoogleSignIn.getClient(getContext(),gso);
-
-        getAccount();
+        tokenManager = new TokenManager(getContext());
         getProfileSpecs();
-
 
         profile_image = view.findViewById(R.id.profile_image);
         logOutButton = view.findViewById(R.id.logOutButton);
-        mailButton = view.findViewById(R.id.mailBt);
         usermail = view.findViewById(R.id.usermail);
 
         username = view.findViewById(R.id.username);
 
 
-         BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+        BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
         navigation.setClickable(true);
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
@@ -96,15 +76,6 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        mailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                composeEmail("PatiSahiplen Uygulaması Hk.");
-            }
-        });
-
-
         return view;
 
     }
@@ -112,84 +83,38 @@ public class ProfileFragment extends Fragment {
 
     public void getAccount() {
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user != null) {
-            for (UserInfo profile : user.getProviderData()) {
-                // Id of the provider (ex: google.com)
-                providerId = profile.getProviderId();
-
-                // UID specific to the provider
-                uid = profile.getUid();
-
-                // Name, email address, and profile photo Url
-                name = profile.getDisplayName();
-                email = profile.getEmail();
-                photoUrl = profile.getPhotoUrl();
-
-                Log.i("Bilgi",uid.toString());
-            }
-        }
     }
 
     public void getProfileSpecs() {
 
-            final Interface[] restInterface = new Interface[1];
-            restInterface[0] = ApiClient.getClient().create(Interface.class);
-            Call<List<UserModel>>call = restInterface[0].getUserSpecs();
-            call.enqueue(new Callback<List<UserModel>>() {
-                @Override
-                public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
+        final Interface[] restInterface = new Interface[1];
+        restInterface[0] = ApiClient.getClient().create(Interface.class);
+        Call<ApiResponse<UserDto>> call = restInterface[0].getUserSpecs("Bearer "+ tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<UserDto>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<UserDto>> call, Response<ApiResponse<UserDto>> response) {
+              if(response.body() != null) {
+                  UserDto userDto = response.body().getData();
+                  username.setText(userDto.getFullName());
+                  usermail.setText(userDto.getEmail());
+                  photoUrl = userDto.getImage();
+                  Picasso.get().load(photoUrl).into(profile_image);
+              }
 
-                  userList = response.body();
+            }
 
-
-                    Picasso.get().load(photoUrl).fit().into(profile_image);
-
-                    profile_image.setBorderColor(660099);
-
-
-
-                    username.setText(name);
-                    usermail.setText(email);
-
-
-
-                }
-
-                @Override
-                public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            @Override
+            public void onFailure(Call<ApiResponse<UserDto>> call, Throwable t) {
 
 
-                    Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-                public  void logOut () {
-
-                    FirebaseAuth mAuth= FirebaseAuth.getInstance();
-                    mAuth.signOut();
-
-                    // Google sign out
-                    mGoogleSignInClient.signOut().addOnCompleteListener(getActivity(),
-                            new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    replaceFragments(WelcomeFragment.class);
-                                }
-                            });
-
-
-}
-
-    public void composeEmail(String subject) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("message/rfc822");
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"emrekentli@gmail.com"});
-        Intent mailer = Intent.createChooser(intent, null);
-        startActivity(mailer);
+    public void logOut() {
+        tokenManager.deleteToken();
+        replaceFragments(WelcomeFragment.class);
     }
 
     public void replaceFragments(Class fragmentClass) {
