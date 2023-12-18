@@ -391,9 +391,7 @@ public class EditYourAdsFragment extends Fragment {
         ageTv = view.findViewById(R.id.ad_age);
         placed1=0;
         placed2=0;
-        closePhoto2 = view.findViewById(R.id.closePhoto2);
         closePhoto1= view.findViewById(R.id.closePhoto1);
-        telephoneTv= view.findViewById(R.id.telephone);
 
         // get the Firebase  storage reference
         storage = FirebaseStorage.getInstance();
@@ -401,7 +399,6 @@ public class EditYourAdsFragment extends Fragment {
 
 
         image1=view.findViewById(R.id.photo1);
-        image2=view.findViewById(R.id.photo2);
 
 
 

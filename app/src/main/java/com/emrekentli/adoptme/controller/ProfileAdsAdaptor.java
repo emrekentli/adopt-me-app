@@ -180,10 +180,10 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
 
     public void deleteAds (String id) {
         final Interface restInterface = new ApiClient().getClient().create(Interface.class);
-        Call<PostModel> call = restInterface.deleteAds(id);
-        call.enqueue(new Callback<PostModel>() {
+        Call<Void> call = restInterface.deleteAds(id);
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
 
                     Toast.makeText(getContext(), "İlan başarıyla silindi.", Toast.LENGTH_SHORT).show();
@@ -197,7 +197,7 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
             }
 
             @Override
-            public void onFailure(Call<PostModel> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 Log.e("Hata",t.toString());
                 Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
             }

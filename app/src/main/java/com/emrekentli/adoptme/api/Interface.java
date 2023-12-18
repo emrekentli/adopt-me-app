@@ -3,6 +3,7 @@ package com.emrekentli.adoptme.api;
 import com.emrekentli.adoptme.model.PostModel;
 import com.emrekentli.adoptme.model.UserModel;
 import com.emrekentli.adoptme.model.VersionCheck;
+import com.emrekentli.adoptme.model.dto.CityDto;
 import com.emrekentli.adoptme.model.request.LoginRequest;
 import com.emrekentli.adoptme.model.request.RegisterRequest;
 import com.emrekentli.adoptme.model.response.AuthenticationResponse;
@@ -29,18 +30,8 @@ public interface Interface {
 
 
 
-    @GET("ads/others")
-    Call<List<PostModel>> getOtherAdsSearch();
-
-    @DELETE("ads/id/{id}")
-    Call<PostModel> deleteAds(@Path("id") String id);
-
-
     @PUT("ads/id/confirmation/{id}")
     Call<PostModel> unConfirmation(@Path("id") String id);
-
-    @GET("version")
-    Call<List<VersionCheck>> checkVersion();
 
 
     @FormUrlEncoded
@@ -74,14 +65,13 @@ public interface Interface {
 
 
 
-    @GET("users/{id}")
-    Call<List<UserModel>>getUserSpecs(@Path("id") String id);
+    @GET("users/my-user")
+    Call<List<UserModel>>getUserSpecs();
 
     @FormUrlEncoded
-    @POST("new")
+    @POST("posts")
     Call<PostModel> addNewAdd(@Field("ad_ownerid") String ad_ownerid,
                               @Field("ad_ownername") String ad_ownername,
-                              @Field("ad_ownertelephone") String ad_ownertelephone,
                               @Field("ad_type") String ad_type,
                               @Field("ad_name") String ad_name,
                               @Field("ad_detail") String ad_detail,
@@ -139,6 +129,9 @@ public interface Interface {
 
     @GET("posts/my-user")
     Call<ApiResponse<DataResponse<PostModel>>> getOwnAds(@Header("Authorization") String authToken);
-
+    @DELETE("posts/{id}")
+    Call<Void> deleteAds(@Path("id") String id);
+    @GET("cities")
+    Call<ApiResponse<DataResponse<CityDto>>> getCities(@Header("Authorization") String authToken);
 }
 

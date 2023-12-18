@@ -82,15 +82,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        drawerMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                drawerLayout.openDrawer(Gravity.START);
-
-            }
-        });
-
 
         // to make the Navigation drawer icon always appear on the action bar
         replaceFragments(AdsFragment.class);

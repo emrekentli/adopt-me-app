@@ -136,7 +136,7 @@ public class ProfileFragment extends Fragment {
 
             final Interface[] restInterface = new Interface[1];
             restInterface[0] = ApiClient.getClient().create(Interface.class);
-            Call<List<UserModel>>call = restInterface[0].getUserSpecs(uid);
+            Call<List<UserModel>>call = restInterface[0].getUserSpecs();
             call.enqueue(new Callback<List<UserModel>>() {
                 @Override
                 public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {

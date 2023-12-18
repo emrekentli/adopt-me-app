@@ -32,7 +32,12 @@ import androidx.fragment.app.FragmentManager;
 import com.emrekentli.adoptme.R;
 import com.emrekentli.adoptme.api.ApiClient;
 import com.emrekentli.adoptme.api.Interface;
+import com.emrekentli.adoptme.database.TokenManager;
 import com.emrekentli.adoptme.model.PostModel;
+import com.emrekentli.adoptme.model.dto.CityDto;
+import com.emrekentli.adoptme.model.dto.Gender;
+import com.emrekentli.adoptme.model.response.ApiResponse;
+import com.emrekentli.adoptme.model.response.DataResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -55,24 +60,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class NewAdd_Fragment extends Fragment {
-
-    private Uri filePath,filePath2;
-
-    // request code
-    private final int PICK_IMAGE_REQUEST = 22;
-
-    // instance for firebase storage and StorageReference
-    FirebaseStorage storage;
-    StorageReference storageReference;
-
-    ImageButton image1,image2;
-    Integer placed1,placed2=null;
-    TextView closePhoto1,closePhoto2;
-    Integer selectedPlace = null;
+    private static final int PICK_IMAGE_REQUEST = 22;
+    ImageButton image1;
+    TokenManager tokenManager;
+    TextView closePhoto1;
     Boolean finishUpload= false;
     private List<PostModel> addNewList;
-
-    private String[] spinnerCityList={"Şehir Seçiniz.","Tüm Türkiye","Adana", "Adıyaman", "Afyon", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
+    private List<CityDto> cities;
+    private String[] spinnerCityList={"Şehir Seçiniz.","Adana", "Adıyaman", "Afyon", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
             "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale",
             "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir",
             "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir",
@@ -82,20 +77,16 @@ public class NewAdd_Fragment extends Fragment {
             "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak",
             "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"};
 
-    private String[] spinnerGenderList={"Cinsiyet seçiniz","Erkek","Dişi","Karışık"};
+    private String[] spinnerGenderList={"Cinsiyet seçiniz","Erkek","Dişi"};
     private String[] spinnerCategoryList={"Kategori Seçiniz","Köpek","Kedi","Kuş","Balık","Tavşan","Hamster","Tavuk","Horoz","Kaz","Ördek","Sürüngenler"};
     Button pushButton;
+
+    Uri filePath;
     private Spinner spinnerIller,spinnerGender,spinnerCategory;
 
     private ArrayAdapter<String> dataAdapterForIller,dataAdapterForGender,dataAdapterForCategory;
-    EditText telephoneTv;
     TextView genusTv,titleTv,detailTv,ageTv;
-    GoogleSignInClient mGoogleSignInClient;
-    String  userId;
-    String userName;
-    StorageReference ref;
     String photo1Url;
-    String iconPathFirebase=null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -104,50 +95,27 @@ public class NewAdd_Fragment extends Fragment {
 
         // bu fragment'in layout'unu hazır hale getirelim
         View view = inflater.inflate(R.layout.newadd_fragment, container, false);
-
         spinnerIller = view.findViewById(R.id.spinnerCity);
         spinnerGender = view.findViewById(R.id.spinnerGender);
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
+
         pushButton = view.findViewById(R.id.pushButton);
         genusTv = view.findViewById(R.id.ad_altcategory);
         detailTv =view.findViewById(R.id.ad_detail);
         titleTv = view.findViewById(R.id.ad_title);
         ageTv = view.findViewById(R.id.ad_age);
-        telephoneTv = view.findViewById(R.id.telephone);
-        placed1=0;
-        placed2=0;
-        closePhoto2 = view.findViewById(R.id.closePhoto2);
         closePhoto1= view.findViewById(R.id.closePhoto1);
 
-        // get the Firebase  storage reference
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
-
-
+        tokenManager = new TokenManager(getContext());
         image1=view.findViewById(R.id.photo1);
-        image2=view.findViewById(R.id.photo2);
-
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder (GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken (getString (R.string.server_client_id))
-                .requestEmail ()
-                .build ();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(getContext(), gso);
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
-
-        userId = account.getId().toString();
-        userName = account.getDisplayName();
 
         closePhoto1.setVisibility(View.INVISIBLE);
-        closePhoto2.setVisibility(View.INVISIBLE);
 
-
+        getCities();
         closePhoto1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                placed1=0;
                 image1.setImageDrawable(null);
                 image1.setBackgroundResource(R.drawable.upload);
                // Toast.makeText(getContext(), placed1.toString(), Toast.LENGTH_SHORT).show();
@@ -155,76 +123,21 @@ public class NewAdd_Fragment extends Fragment {
             }
         });
 
-        closePhoto2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                image2.setImageDrawable(null);
-                image2.setBackgroundResource(R.drawable.upload);
-                placed2=0;
-               // Toast.makeText(getContext(), placed2.toString(), Toast.LENGTH_SHORT).show();
-
-                closePhoto2.setVisibility(View.INVISIBLE);
-            }
-        });
 
         image1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectedPlace=1;
                 SelectImage();
-                placed1=1;
                 closePhoto1.setVisibility(View.VISIBLE);
             }
         });
 
-        image2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectedPlace=2;
-                placed2=1;
-                SelectImage();
-                closePhoto2.setVisibility(View.VISIBLE);
-            }
-        });
-
-
-
-
-
-
-
         setCity();
-
-
         pushButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (formControl()) {
-
-                    if ((placed1==0) & (placed2==1)) {
-
-
-                        uploadImage(1,filePath2,false);
-
-
-                    } else if  ((placed1==1) & (placed2==0)) {
-
-                        uploadImage(1,filePath,false);
-
-
-
-                    } else if ((placed1==1) & (placed2==1)) {
-
-                        uploadImage(2,filePath,false);
-                        uploadImage(2,filePath2,true);
-                    } else if ((placed1==0) & (placed2==0)) {
-
-                        Toast.makeText(getContext(), "Lütfen fotoğraf yükleyiniz.", Toast.LENGTH_SHORT).show();
-
-
-                    }
 
                 } else {
 
@@ -241,37 +154,56 @@ public class NewAdd_Fragment extends Fragment {
         return view;
 
     }
+    public void getCities() {
 
-
-
-    public void addNewAd( String userId, String ownerName,String city, String category,String gender,String altCategory,String age,String tittle,String detail,String photo1,String photo2, String  date) {
-
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
-        Call<PostModel> call = restInterface[0].addNewAdd(userId,ownerName,telephoneTv.getText().toString(),"Sahiplenme",tittle,detail,category,altCategory,age,null,city,null,photo1,photo2,altCategory,date,gender,1);
-        call.enqueue(new Callback<PostModel>() {
+        final Interface restInterface = ApiClient.getClient().create(Interface.class);
+        Call<ApiResponse<DataResponse<CityDto>>> call = restInterface.getCities("Bearer " + tokenManager.getToken());
+        call.enqueue(new Callback<ApiResponse<DataResponse<CityDto>>>() {
             @Override
-            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
+            public void onResponse(Call<ApiResponse<DataResponse<CityDto>>> call, Response<ApiResponse<DataResponse<CityDto>>> response) {
                 if (response.isSuccessful()) {
-
-                    replaceFragments(InboxFragment.class);
-
-                    Toast.makeText(getActivity(), "İlan incelemeye gönderildi.", Toast.LENGTH_LONG).show();
-
-                } else {
-
-
+                        cities = response.body().getData().getItems();
 
                 }
-
             }
-
             @Override
-            public void onFailure(Call<PostModel> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<CityDto>>> call, Throwable t) {
                 Log.e("Hata",t.toString());
                 Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+
+    }
+
+
+    public void addNewAd( String city, String animalType,String gender,String breed,String age,String title,String description,String photo1) {
+//
+//        final Interface[] restInterface = new Interface[1];
+//        restInterface[0] = ApiClient.getClient().create(Interface.class);
+//        Call<PostModel> call = restInterface[0].addNewAdd(title,description,animalType,breed,age,null,city,null,photo1,breed, Gender.valueOf(gender));
+//        call.enqueue(new Callback<PostModel>() {
+//            @Override
+//            public void onResponse(Call<PostModel> call, Response<PostModel> response) {
+//                if (response.isSuccessful()) {
+//
+//                    replaceFragments(InboxFragment.class);
+//
+//                    Toast.makeText(getActivity(), "İlan incelemeye gönderildi.", Toast.LENGTH_LONG).show();
+//
+//                } else {
+//
+//
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<PostModel> call, Throwable t) {
+//                Log.e("Hata",t.toString());
+//                Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
     }
 
@@ -311,7 +243,6 @@ public class NewAdd_Fragment extends Fragment {
 
             // Get the Uri of data
 
-            if (selectedPlace == 1) {
 
                 filePath = data.getData();
                 try {
@@ -331,37 +262,6 @@ public class NewAdd_Fragment extends Fragment {
                     // Log the exception
                     e.printStackTrace();
                 }
-
-
-            } else {
-
-
-                filePath2 = data.getData();
-                try {
-
-                    // Setting image on image view using Bitmap
-                    Bitmap bitmap = MediaStore
-                            .Images
-                            .Media
-                            .getBitmap(
-                                    getActivity().getContentResolver(),
-                                    filePath2);
-                    image2.setImageDrawable(null);
-                    image2.setImageBitmap(bitmap);
-
-                } catch (IOException e) {
-                    // Log the exception
-                    e.printStackTrace();
-                }
-
-
-
-            }
-
-
-
-
-
         }
     }
 
@@ -369,215 +269,9 @@ public class NewAdd_Fragment extends Fragment {
     private void uploadImage(Integer Mode,Uri filePathValue,Boolean finishUploadValue) {
 
 
-        if (Mode == 1) {
-            if (filePathValue != null) {
-
-                // Code for showing progressDialog while uploading
-                ProgressDialog progressDialog
-                        = new ProgressDialog(getContext());
-                progressDialog.setTitle("Uploading...");
-                progressDialog.show();
-
-                // Defining the child of storageReference
-                StorageReference ref
-                        = storageReference
-                        .child(
-                                "photos/"
-                                        + UUID.randomUUID().toString());
-
-                UploadTask uploadTask = ref.putFile(filePathValue);
-
-                Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                    @Override
-                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                        if (!task.isSuccessful()) {
-                            throw task.getException();
-                        }
-
-                        // Continue with the task to get the download URL
-                        return ref.getDownloadUrl();
-                    }
-                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                                           @Override
-                                                                                           public void onComplete(@NonNull Task<Uri> task) {
-                                                                                               if (task.isSuccessful()) {
-                                                                                                   Uri downloadUri = task.getResult();
-                                                                                                   iconPathFirebase = downloadUri.toString();
 
 
-                                                                                                   addNewAd(
-                                                                                                           userId,
-                                                                                                           userName,
-                                                                                                           spinnerIller.getSelectedItem().toString(),
-                                                                                                           spinnerCategory.getSelectedItem().toString(),
-                                                                                                           spinnerGender.getSelectedItem().toString(),
-                                                                                                           genusTv.getText().toString(),
-                                                                                                           ageTv.getText().toString(),
-                                                                                                           titleTv.getText().toString(),
-                                                                                                           detailTv.getText().toString(),
-                                                                                                           iconPathFirebase,
-                                                                                                           null,
-                                                                                                           "24.06.2021"
-                                                                                                   );
-
-                                                                                               } else {
-                                                                                                   // Handle failures
-                                                                                                   // ...
-                                                                                               }
-
-
-                                                                                               // Image uploaded successfully
-                                                                                               // Dismiss dialog
-                                                                                               progressDialog.dismiss();
-                                                                                               Toast
-                                                                                                       .makeText(getContext(),
-                                                                                                               "Resim yüklendi.",
-                                                                                                               Toast.LENGTH_SHORT)
-                                                                                                       .show();
-
-
-                                                                                           }
-                                                                                       }
-                );
-
-
-            }
-
-
-        } else if (Mode == 2) {
-
-            ref
-                    = storageReference
-                    .child(
-                            "photos/"
-                                    + UUID.randomUUID().toString());
-
-            UploadTask uploadTask = ref.putFile(filePathValue);
-
-
-            if (filePathValue != null) {
-
-                // Code for showing progressDialog while uploading
-                ProgressDialog progressDialog
-                        = new ProgressDialog(getContext());
-                progressDialog.setTitle("Uploading...");
-                progressDialog.show();
-
-                // Defining the child of storageReference
-
-                if (finishUploadValue == false) {
-
-
-                    StorageReference ref
-                            = storageReference
-                            .child(
-                                    "photos/"
-                                            + UUID.randomUUID().toString());
-
-                    uploadTask = ref.putFile(filePathValue);
-
-                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
-                            }
-
-                            // Continue with the task to get the download URL
-                            return ref.getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if (task.isSuccessful()) {
-                                Uri downloadUri = task.getResult();
-                                photo1Url = downloadUri.toString();
-
-                                progressDialog.dismiss();
-                                Toast
-                                        .makeText(getContext(),
-                                                "Resim yüklendi.",
-                                                Toast.LENGTH_SHORT)
-                                        .show();
-                            }
-                        }
-                    });
-
-
-                } else if (finishUploadValue) {
-
-
-                    ref = storageReference.child("photos/" + UUID.randomUUID().toString());
-
-
-                    // adding listeners on upload
-
-
-                    uploadTask = ref.putFile(filePathValue);
-
-                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
-                            }
-
-                            // Continue with the task to get the download URL
-                            return ref.getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @RequiresApi(api = Build.VERSION_CODES.O)
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if (task.isSuccessful()) {
-                                Uri downloadUri = task.getResult();
-                                iconPathFirebase = downloadUri.toString();
-
-                                // Image uploaded successfully
-                                // Dismiss dialog
-                                progressDialog.dismiss();
-                                Toast
-                                        .makeText(getContext(),
-                                                "Resim yüklendi.",
-                                                Toast.LENGTH_SHORT)
-                                        .show();
-
-
-                                addNewAd
-                                        (
-                                        userId,
-                                        userName,
-                                        spinnerIller.getSelectedItem().toString(),
-                                        spinnerCategory.getSelectedItem().toString(),
-                                        spinnerGender.getSelectedItem().toString(),
-                                        genusTv.getText().toString(),
-                                        ageTv.getText().toString(),
-                                        titleTv.getText().toString(),
-                                        detailTv.getText().toString(),
-                                        photo1Url,
-                                        iconPathFirebase,
-                                        String.valueOf(LocalDate.now())
-                                );
-                            }
-
-                        }
-
-                    });
-
-
-
-
-
-                }
-
-
-            }
-
-
-        }
-
-
-    };
+    }
 
 
 
@@ -585,7 +279,6 @@ public class NewAdd_Fragment extends Fragment {
 
 
     public void setCity() {
-
 
         // spinnerIlceler = (Spinner) getActivity().findViewById(R.id.spinner2);
 
@@ -613,54 +306,13 @@ public class NewAdd_Fragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-                //Hangi il seçilmişse onun ilçeleri adapter'e ekleniyor.
-                /* if(parent.getSelectedItem().toString().equals(iller[0]))
-                    dataAdapterForIlceler = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item,ilceler0);
-                else if(parent.getSelectedItem().toString().equals(iller[1]))
-                    dataAdapterForIlceler = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item,ilceler1);
-
-                dataAdapterForIlceler.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                spinnerIlceler.setAdapter(dataAdapterForIlceler); */
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-/*        spinnerIlceler.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                //Seçilen il ve ilçeyi ekranda gösteriyoruz.
-            //    sehirAdi = spinnerIller.getSelectedItem().toString();
-              //  ilceAdi = parent.getSelectedItem().toString();
-
-                //eczaneVericek(sehirAdi,ilceAdi);
-                //Toast.makeText(getActivity(), sehirAdi + ilceAdi, Toast.LENGTH_SHORT).show();
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        }); */
-
     }
-
-    private void getUrlAsync (String parametre){
-        // Points to the root reference
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference dateRef = storageRef.child("photos/");
-        dateRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
-        {
-            @Override
-            public void onSuccess(Uri downloadUrl)
-            {
-                //do something with downloadurl
-            }
-        });
-    }
-
 
     public boolean formControl() {
 
@@ -683,11 +335,6 @@ public class NewAdd_Fragment extends Fragment {
 
         if(TextUtils.isEmpty(ageTv.getText())) {
             genusTv.setError("Yaş kısmı boş bırakılamaz.");
-            control= false;
-        }
-
-        if(TextUtils.isEmpty(telephoneTv.getText())) {
-            genusTv.setError("Telefon kısmı boş bırakılamaz.");
             control= false;
         }
 

@@ -400,15 +400,15 @@ public class SearchFragment extends Fragment {
         final Interface[] restInterface = new Interface[1];
         restInterface[0] = ApiClient.getClient().create(Interface.class);
 
-        Call<List<PostModel>>  repos = restInterface[0].getOtherAdsSearch();
+        Call<ApiResponse<DataResponse<PostModel>>> repos = restInterface[0].getOtherAds("Bearer " +tokenManager.getToken());
 
-        repos.enqueue(new Callback<List<PostModel>>() {
+        repos.enqueue(new Callback<ApiResponse<DataResponse<PostModel>>>() {
             @Override
-            public void onResponse(  Call<List<PostModel>>  call, Response<List<PostModel>> response) {
+            public void onResponse(  Call<ApiResponse<DataResponse<PostModel>>>  call, Response<ApiResponse<DataResponse<PostModel>>> response) {
                 if (response.body() != null) {
 
 
-                    foundData.addAll(response.body());
+                    foundData.addAll(response.body().getData().getItems());
 
                     //   Toast.makeText(getContext(), response.body().toString(), Toast.LENGTH_SHORT).show();
 
@@ -427,7 +427,7 @@ public class SearchFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DataResponse<PostModel>>> call, Throwable t) {
                 Log.d(TAG, "Error: " + t.toString());
             }
 
