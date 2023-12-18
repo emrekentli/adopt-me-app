@@ -35,21 +35,14 @@ import com.emrekentli.adoptme.fragments.SearchFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String ONESIGNAL_APP_ID = "aeabceb5-8aad-444a-9bed-f328c3c26f9d";
+public class MainActivity extends AppCompatActivity {
     FrameLayout fragmentLayout;
-    LinearLayout action;
     private TokenManager tokenManager;
-    View menu;
-    ImageButton drawerMenuButton;
-    Boolean mSlideState = false;
     ImageButton newAddButton;
-    public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
     BottomNavigationView navigation;
     LinearLayout loading;
 
-    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -70,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
 
-        setNavigationViewListener();
 
         newAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,21 +73,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
-
-
-        // to make the Navigation drawer icon always appear on the action bar
         replaceFragments(AdsFragment.class);
     }
 
     private void redirectToLogin() {
         replaceFragments(WelcomeFragment.class);
     }
-
-    // override the onOptionsItemSelected()
-    // function to implement
-    // the item click listener callback
-    // to open and close the navigation
-    // drawer when the icon is clicked
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
@@ -158,71 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fragmentLayout, fragment)
                 .commit();
-    }
-
-
-    private void setNavigationViewListener() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.NavigationView);
-        navigationView.setNavigationItemSelectedListener(this);
-    }
-
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        switch (item.getItemId()) {
-
-            case R.id.nav_kopek: {
-                replaceFragmentsSearch("köpek", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_kedi: {
-                replaceFragmentsSearch("kedi", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_kus: {
-                replaceFragmentsSearch("kuş", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_balik: {
-                replaceFragmentsSearch("balık", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_tavsan: {
-                replaceFragmentsSearch("tavşan", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_hamster: {
-                replaceFragmentsSearch("hamster", SearchFragment.class);
-                break;
-            }
-
-            case R.id.nav_tavuk: {
-                replaceFragmentsSearch("tavuk", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_horoz: {
-                replaceFragmentsSearch("horoz", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_kaz: {
-                replaceFragmentsSearch("kaz", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_ordek: {
-                replaceFragmentsSearch("ördek", SearchFragment.class);
-                break;
-            }
-            case R.id.nav_surungenler: {
-                replaceFragmentsSearch("sürüngen", SearchFragment.class);
-                break;
-            }
-
-
-        }
-        //close navigation drawer
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     public void replaceFragmentsSearch(String value, Class fragmentClass) {
