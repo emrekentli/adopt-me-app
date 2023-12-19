@@ -7,6 +7,7 @@ import com.emrekentli.adoptme.model.dto.AnimalTypeDto;
 import com.emrekentli.adoptme.model.dto.BreedDto;
 import com.emrekentli.adoptme.model.dto.CityDto;
 import com.emrekentli.adoptme.model.dto.DistrictDto;
+import com.emrekentli.adoptme.model.dto.MediaDto;
 import com.emrekentli.adoptme.model.request.LoginRequest;
 import com.emrekentli.adoptme.model.request.PostRequest;
 import com.emrekentli.adoptme.model.request.RegisterRequest;
@@ -16,8 +17,10 @@ import com.emrekentli.adoptme.model.response.ApiResponse;
 import com.emrekentli.adoptme.model.response.UserDto;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 
+import java.io.File;
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -25,8 +28,10 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -72,6 +77,10 @@ public interface Interface {
     Call<ApiResponse<DataResponse<BreedDto>>> getBreeds(@Header("Authorization") String authToken,@Query("animalTypeId") String animalTypeId);
     @GET("districts/filter")
     Call<ApiResponse<DataResponse<DistrictDto>>> getDistricts(@Header("Authorization") String authToken, @Query("cityId") String cityId);
+
+    @POST("media/single")
+    @Multipart
+    Call<ApiResponse<MediaDto>> uploadImage(@Header("Authorization") String authToken, @Part MultipartBody.Part file);
     @POST("posts")
     Call<ApiResponse<PostModel>> addPost(@Header("Authorization") String authToken, @Body PostRequest request);
 }

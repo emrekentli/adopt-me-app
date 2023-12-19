@@ -2,7 +2,9 @@ package com.emrekentli.adoptme.fragments;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -34,15 +36,20 @@ import com.emrekentli.adoptme.model.dto.BreedDto;
 import com.emrekentli.adoptme.model.dto.CityDto;
 import com.emrekentli.adoptme.model.dto.DistrictDto;
 import com.emrekentli.adoptme.model.dto.Gender;
+import com.emrekentli.adoptme.model.dto.MediaDto;
 import com.emrekentli.adoptme.model.request.PostRequest;
 import com.emrekentli.adoptme.model.response.ApiResponse;
 import com.emrekentli.adoptme.model.response.DataResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,6 +74,7 @@ public class NewAdd_Fragment extends Fragment {
 
     Uri filePath;
     private Spinner spinnerIller, spinnerGender, spinnerCategory, spinnerBreed, spinnerDistrict;
+    File mainImage;
 
     private ArrayAdapter<String> dataAdapterForIller, dataAdapterForGender, dataAdapterForCategory, dataAdapterForBreed, dataAdapterForDistricts;
     TextView titleTv, detailTv, ageTv;
@@ -124,7 +132,7 @@ public class NewAdd_Fragment extends Fragment {
             public void onClick(View v) {
 
                 if (formControl()) {
-                    addPost(spinnerIller.getSelectedItem().toString(), spinnerDistrict.getSelectedItem().toString(),spinnerCategory.getSelectedItem().toString(), spinnerGender.getSelectedItem().toString(), spinnerBreed.getSelectedItem().toString(), ageTv.getText().toString(), titleTv.getText().toString(), detailTv.getText().toString());
+                    addPost(spinnerIller.getSelectedItem().toString(), spinnerDistrict.getSelectedItem().toString(), spinnerCategory.getSelectedItem().toString(), spinnerGender.getSelectedItem().toString(), spinnerBreed.getSelectedItem().toString(), ageTv.getText().toString(), titleTv.getText().toString(), detailTv.getText().toString());
                 } else {
 
                 }
@@ -244,7 +252,10 @@ public class NewAdd_Fragment extends Fragment {
 
     }
 
-
+    private MultipartBody.Part prepareFilePart(String partName, File file) {
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+    }
     public void addPost(String city, String district, String animalType, String gender, String breed, String age, String title, String description) {
         String cityId = "";
         String breedId = "";
@@ -263,7 +274,7 @@ public class NewAdd_Fragment extends Fragment {
                 break;
             }
         }
-      for (BreedDto breedDto : breeds) {
+        for (BreedDto breedDto : breeds) {
             if (breedDto.getName().equals(breed)) {
                 breedId = breedDto.getId();
                 break;
@@ -286,24 +297,42 @@ public class NewAdd_Fragment extends Fragment {
         request.setGender(genderValue);
         request.setTitle(title);
         request.setName(title);
+        MultipartBody.Part body = prepareFilePart("file", mainImage);
+        Call<ApiResponse<MediaDto>> calLImage = restInterface.uploadImage("Bearer " + tokenManager.getToken(), body);
 
-        Call<ApiResponse<PostModel>> call = restInterface.addPost("Bearer " + tokenManager.getToken(), request);
-        call.enqueue(new Callback<ApiResponse<PostModel>>() {
+        calLImage.enqueue(new Callback<ApiResponse<MediaDto>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PostModel>> call, Response<ApiResponse<PostModel>> response) {
+            public void onResponse(Call<ApiResponse<MediaDto>> call, Response<ApiResponse<MediaDto>> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(getActivity(), "İlan başarıyla eklendi.", Toast.LENGTH_SHORT).show();
-                    replaceFragments(InboxFragment.class);
+                    MediaDto dto = response.body().getData();
+                    request.setMainImage(dto.getFilePath() + dto.getFileName());
+
+                    // İlanı ekleyin
+                    Call<ApiResponse<PostModel>> callAddPost = restInterface.addPost("Bearer " + tokenManager.getToken(), request);
+                    callAddPost.enqueue(new Callback<ApiResponse<PostModel>>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<PostModel>> call, Response<ApiResponse<PostModel>> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(getActivity(), "İlan başarıyla eklendi.", Toast.LENGTH_SHORT).show();
+                                replaceFragments(InboxFragment.class);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<PostModel>> call, Throwable t) {
+                            Log.e("Hata", t.toString());
+                            Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PostModel>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<MediaDto>> call, Throwable t) {
                 Log.e("Hata", t.toString());
                 Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-
 
     }
 
@@ -341,11 +370,12 @@ public class NewAdd_Fragment extends Fragment {
                 && data.getData() != null) {
 
             // Get the Uri of data
-
-
             filePath = data.getData();
-            try {
 
+            // Convert Uri to File
+            mainImage = uriToFile(filePath, getActivity());
+
+            try {
                 // Setting image on image view using Bitmap
                 Bitmap bitmap = MediaStore
                         .Images
@@ -364,10 +394,18 @@ public class NewAdd_Fragment extends Fragment {
         }
     }
 
-    // UploadImage method
-    private void uploadImage(Integer Mode, Uri filePathValue, Boolean finishUploadValue) {
-
-
+    private File uriToFile(Uri uri, Context context) {
+        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(uri, filePathColumn, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String filePath = cursor.getString(columnIndex);
+            cursor.close();
+            return new File(filePath);
+        } else {
+            return null;
+        }
     }
 
 
