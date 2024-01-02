@@ -3,7 +3,9 @@ package com.emrekentli.adoptme.controller;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,7 +79,6 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
         TextView txtName = convertView.findViewById(R.id.ad_Name);
         Button deleteBt = convertView.findViewById(R.id.deleteBt);
         TextView adViewValue = convertView.findViewById(R.id.ad_ViewValue);
-
         Boolean confirmation = listdata.getVerified();
         if (confirmation != null) {
             if (confirmation) {
@@ -94,11 +95,10 @@ public class ProfileAdsAdaptor extends ArrayAdapter<PostModel> {
         txtName.setText(listdata.getName());
         adDetail2.setText("\n" + listdata.getDescription());
         adDetail.setText(listdata.getAnimalType().getName());
+        String base64Image = listdata.getMainImage();
+        byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
+        img.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
 
-        Picasso
-                .get()
-                .load(listdata.getMainImage())
-                .into(img);
 
 
            if (adDetail2.length()>50) {

@@ -5,11 +5,14 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -209,11 +212,10 @@ public class AdDetailFragment extends Fragment {
     }
 
     public void getById(String id) {
-        final Interface[] restInterface = new Interface[1];
-        restInterface[0] = ApiClient.getClient().create(Interface.class);
+        final Interface restInterface = ApiClient.getClient().create(Interface.class);
         tokenManager =  new TokenManager(getContext());
         String token = tokenManager.getToken();
-        Call<ApiResponse<PostModel>> call = restInterface[0].getById("Bearer "+ token,id);
+        Call<ApiResponse<PostModel>> call = restInterface.getById("Bearer "+ token,id);
 
         call.enqueue(new Callback<ApiResponse<PostModel>>() {
             @Override
@@ -231,13 +233,10 @@ public class AdDetailFragment extends Fragment {
                     dateValue.setText(formatDate(repo.getCreated()));
 
                     telephone = repo.getOwner().getPhoneNumber();
-
-                    Picasso
-                            .get()
-                            .load(repo.getMainImage())
-                            .fit()
-                            .into(mainImage);
-
+                    String base64Image = repo.getMainImage();
+                    byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
+                    Bitmap originalBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+                    mainImage.setImageBitmap(originalBitmap);
                     photo1url = repo.getMainImage();
                     adDetail.setText("\n" + repo.getDescription() + "\n");
                     ageValue.setText(repo.getAge().toString());

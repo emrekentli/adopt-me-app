@@ -19,15 +19,5 @@ public class ApiClient {
         return retrofit;
     }
 
-    public static Retrofit getClientVersion() {
-
-        retrofit2 = new Retrofit.Builder()
-                .baseUrl("172.26.240.1:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(new OkHttpClient())
-                .build();
-        return retrofit2;
-    }
-
 }
 

@@ -1,12 +1,16 @@
 package com.emrekentli.adoptme.controller;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,23 +50,14 @@ public class AdsAdaptor extends ArrayAdapter<PostModel> {
             ImageView img = (ImageView) convertView.findViewById(R.id.image_view);
             TextView txtCountry = convertView.findViewById(R.id.country);
 
-            TextView txtName = convertView.findViewById(R.id.ads_name);
 
 
             txtCountry.setText(listdata.getCity().getName());
-            txtName.setText(listdata.getName());
 
-           Picasso
-                    .get()
-                    .load(listdata.getMainImage())
-                    .resize(400,400)
-                    .centerCrop()
-                    .into(img);
-
-
-
-
-
+        String base64Image = listdata.getMainImage();
+        byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
+        Bitmap originalBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+        img.setImageBitmap(originalBitmap);
         return convertView;
     }
 

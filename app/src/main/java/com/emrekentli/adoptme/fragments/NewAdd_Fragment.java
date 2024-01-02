@@ -305,9 +305,7 @@ public class NewAdd_Fragment extends Fragment {
             public void onResponse(Call<ApiResponse<MediaDto>> call, Response<ApiResponse<MediaDto>> response) {
                 if (response.isSuccessful()) {
                     MediaDto dto = response.body().getData();
-                    request.setMainImage(dto.getFilePath() + dto.getFileName());
-
-                    // İlanı ekleyin
+                    request.setMainImage(dto.getBase64Type());
                     Call<ApiResponse<PostModel>> callAddPost = restInterface.addPost("Bearer " + tokenManager.getToken(), request);
                     callAddPost.enqueue(new Callback<ApiResponse<PostModel>>() {
                         @Override
