@@ -50,7 +50,8 @@ public class AdsAdaptor extends ArrayAdapter<PostModel> {
             ImageView img = (ImageView) convertView.findViewById(R.id.image_view);
             TextView txtCountry = convertView.findViewById(R.id.country);
 
-
+        TextView txtName = convertView.findViewById(R.id.ads_name);
+        txtName.setText(listdata.getName());
 
             txtCountry.setText(listdata.getCity().getName());
 

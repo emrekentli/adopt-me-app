@@ -245,6 +245,21 @@ public class AdDetailFragment extends Fragment {
                     cinsValue.setText(repo.getBreed().getName());
                     memberName.setText(repo.getOwner().getFullName());
                     buttonTelephone.setText("Mesaj Gönder +" + repo.getOwner().getPhoneNumber());
+                    buttonTelephone.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent sendIntent = new Intent("android.intent.action.MAIN");
+                            sendIntent.setAction(Intent.ACTION_VIEW);
+                            sendIntent.setPackage("com.whatsapp");
+                            String url = "https://api.whatsapp.com/send?phone=" + telephone;
+                            sendIntent.setData(Uri.parse(url));
+                            if (sendIntent.resolveActivity(getContext().getPackageManager()) != null) {
+                                startActivity(sendIntent);
+                            } else {
+                                Toast.makeText(getContext(), "WhatsApp is not installed.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
 
                 } else {
                     Toast.makeText(getContext(), "İlan bulunamadı.", Toast.LENGTH_SHORT).show();
@@ -321,11 +336,13 @@ public class AdDetailFragment extends Fragment {
         ImageView photo = (ImageView) dialog.findViewById(R.id.photo);
 
         if (url.equals("1")) {
-            Picasso.get().load(photo1url).fit().into(photo);
+            byte[] imageAsBytes = Base64.decode(photo1url.getBytes(), Base64.DEFAULT);
+            Bitmap originalBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+            photo.setImageBitmap(originalBitmap);
         } else {
-            Picasso.get().load(photo2url).fit().into(photo);
-
-
+            byte[] imageAsBytes = Base64.decode(photo2url.getBytes(), Base64.DEFAULT);
+            Bitmap originalBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+            photo.setImageBitmap(originalBitmap);
         }
 
 

@@ -2,6 +2,9 @@ package com.emrekentli.adoptme.controller;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,14 +58,10 @@ public class SearchAdaptor extends ArrayAdapter<PostModel> {
         txtName.setText(listdata.getName());
         txtCountry.setText(listdata.getCity().getName());
         txtDetail.setText(formatDate(listdata.getCreated()));
-
-        Picasso
-                .get()
-                .load(listdata.getMainImage())
-                .fit()
-                .into(img);
-
-
+        String base64Image = listdata.getMainImage();
+        byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
+        Bitmap originalBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+        img.setImageBitmap(originalBitmap);
         return convertView;
     }
 

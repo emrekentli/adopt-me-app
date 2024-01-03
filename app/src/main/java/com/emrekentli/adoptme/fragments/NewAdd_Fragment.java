@@ -184,8 +184,10 @@ public class NewAdd_Fragment extends Fragment {
             public void onResponse(Call<ApiResponse<DataResponse<DistrictDto>>> call, Response<ApiResponse<DataResponse<DistrictDto>>> response) {
                 if (response.isSuccessful()) {
                     districts = response.body().getData().getItems();
+                    spinnerDistrictList.clear();
+                    spinnerDistrictList.add("İlçe Seçiniz.");
                     for (DistrictDto district : districts) {
-                        spinnerDistrictList.add(district.getName());
+                       spinnerDistrictList.add(district.getName());
                     }
                 }
             }
@@ -207,6 +209,8 @@ public class NewAdd_Fragment extends Fragment {
             public void onResponse(Call<ApiResponse<DataResponse<AnimalTypeDto>>> call, Response<ApiResponse<DataResponse<AnimalTypeDto>>> response) {
                 if (response.isSuccessful()) {
                     animalTypes = response.body().getData().getItems();
+                    spinnerCategoryList.clear();
+                    spinnerCategoryList.add("Kategori Seçiniz");
                     for (AnimalTypeDto animalType : animalTypes) {
                         spinnerCategoryList.add(animalType.getName());
                     }
@@ -237,6 +241,8 @@ public class NewAdd_Fragment extends Fragment {
             public void onResponse(Call<ApiResponse<DataResponse<BreedDto>>> call, Response<ApiResponse<DataResponse<BreedDto>>> response) {
                 if (response.isSuccessful()) {
                     breeds = response.body().getData().getItems();
+                    spinnerBreedList.clear();
+                    spinnerBreedList.add("Cins Seçiniz");
                     for (BreedDto breed : breeds) {
                         spinnerBreedList.add(breed.getName());
                     }
