@@ -66,7 +66,6 @@ public class RegisterFragment extends Fragment {
         String confirmPassword = confirmPasswordEditText.getText().toString();
         String phoneNumber = phoneNumberEditText.getText().toString();
         checkInputs(fullName, email, password, confirmPassword, phoneNumber);
-        register(fullName, email, password,  phoneNumber);
     }
 
     private void register(String fullName, String email, String password,  String phoneNumber) {
@@ -108,21 +107,26 @@ public class RegisterFragment extends Fragment {
         if (fullName.isEmpty()) {
             fullNameEditText.setError("Ad Soyad boş bırakılamaz!");
             fullNameEditText.requestFocus();
-        } else if (email.isEmpty()) {
+        } if (email.isEmpty()) {
             emailEditText.setError("Email boş bırakılamaz!");
             emailEditText.requestFocus();
-        } else if (password.isEmpty()) {
+        }if (password.isEmpty()) {
             passwordEditText.setError("Şifre boş bırakılamaz!");
             passwordEditText.requestFocus();
-        } else if (confirmPassword.isEmpty()) {
+        } if (confirmPassword.isEmpty()) {
             confirmPasswordEditText.setError("Şifre tekrarı boş bırakılamaz!");
             confirmPasswordEditText.requestFocus();
-        } else if (phoneNumber.isEmpty()) {
+        }if (phoneNumber.isEmpty()) {
             phoneNumberEditText.setError("Telefon numarası boş bırakılamaz!");
             phoneNumberEditText.requestFocus();
-        } else if (!password.equals(confirmPassword)) {
+        }
+        if (!password.equals(confirmPassword)) {
             confirmPasswordEditText.setError("Şifreler eşleşmiyor!");
             confirmPasswordEditText.requestFocus();
         }
+        if (!fullName.isEmpty() && !email.isEmpty() && !password.isEmpty() && !confirmPassword.isEmpty() && !phoneNumber.isEmpty() && password.equals(confirmPassword)) {
+            register(fullName, email, password, phoneNumber);
+        }
+
     }
 }

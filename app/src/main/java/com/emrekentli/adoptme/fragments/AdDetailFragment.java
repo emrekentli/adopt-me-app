@@ -50,7 +50,7 @@ import retrofit2.Response;
 
 public class AdDetailFragment extends Fragment {
     PhotoView mainImage;
-    TextView adName, adDetail, adCountry, dateValue;
+    TextView adName, adDetail, adCountry,adDistrict, dateValue;
     String adId;
     TextView ageValue, sexValue, CategoryValue, cinsValue, memberName;
     LinearLayout wpButton;
@@ -105,6 +105,7 @@ public class AdDetailFragment extends Fragment {
         adName = view.findViewById(R.id.ad_name);
         adDetail = view.findViewById(R.id.ad_detail);
         adCountry = view.findViewById(R.id.country);
+        adDistrict = view.findViewById(R.id.district);
         dateValue = view.findViewById(R.id.date);
         memberName = view.findViewById(R.id.profileName);
         ageValue = view.findViewById(R.id.yasvalue);
@@ -228,8 +229,8 @@ public class AdDetailFragment extends Fragment {
 
 
                     adCountry.setText(repo.getCity().getName());
+                    adDistrict.setText(repo.getDistrict().getName());
                     adName.setText("\n" + repo.getName() + "\n");
-                    getAccountDetails(repo.getOwner());
                     dateValue.setText(formatDate(repo.getCreated()));
 
                     telephone = repo.getOwner().getPhoneNumber();

@@ -63,7 +63,6 @@ public class LoginFragment extends Fragment {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         checkInputs(email, password);
-        login(email, password);
     }
 
     private void login(String email, String password) {
@@ -109,9 +108,17 @@ public class LoginFragment extends Fragment {
       if (email.isEmpty()) {
             emailEditText.setError("Email boş bırakılamaz!");
             emailEditText.requestFocus();
-        } else if (password.isEmpty()) {
+        }
+      if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailEditText.setError("Geçerli bir email adresi giriniz!");
+            emailEditText.requestFocus();
+        }
+      if (password.isEmpty()) {
             passwordEditText.setError("Şifre boş bırakılamaz!");
             passwordEditText.requestFocus();
+        }
+      if (!email.isEmpty() && !password.isEmpty()) {
+            login(email, password);
         }
     }
 }
